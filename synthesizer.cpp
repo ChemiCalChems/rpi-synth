@@ -10,7 +10,7 @@ unsigned char nibble(unsigned char byte, bool first = true) {
 
 
 Synthesizer::Synthesizer(CInterruptSystem* interrupt_system)
-	: CPWMSoundBaseDevice(interrupt_system,48000, 256),
+	: CPWMSoundBaseDevice(interrupt_system, 44100, 512),
 	  serial(interrupt_system, true) {
 }
 
@@ -170,7 +170,7 @@ unsigned Synthesizer::GetChunk(u32* buf, unsigned chunk_size) {
 		*buf++ = (u32) sample;
 		*buf++ = (u32) sample;
 				
-		Synthesizer::t += (double)1/(double)48000;
+		Synthesizer::t += (double)1/(double)44100;
 		if (Synthesizer::t > 60) Synthesizer::t = 0;
 	}
 	//CLogger::Get()->Write("a", LogNotice, "A");
