@@ -120,7 +120,7 @@ CFLAGS	+= -ffunction-sections -fdata-sections
 LDFLAGS	+= --gc-sections
 endif
 
-OPTIMIZE ?= -O2
+OPTIMIZE ?= -Ofast
 
 EXTRALIBS += /opt/circle/lib/fs/fat/libfatfs.a /usr/arm-none-eabi/lib/libc.a /usr/arm-none-eabi/lib/libm.a /opt/circle/lib/libcircle.a  /opt/circle/lib/sched/libsched.a /opt/circle/lib/input/libinput.a /usr/arm-none-eabi/lib/libcirclenewlib.a
 
@@ -131,7 +131,7 @@ DEFINE	+= -D__circle__ -DRASPPI=$(RASPPI) -DSTDLIB_SUPPORT=$(STDLIB_SUPPORT) \
 
 AFLAGS	+= $(ARCH) $(DEFINE) $(INCLUDE) $(OPTIMIZE)
 CFLAGS	+= $(ARCH) -Wall -fsigned-char -ffreestanding $(DEFINE) $(INCLUDE) $(OPTIMIZE) -g
-CPPFLAGS+= $(CFLAGS) -std=c++2a -fno-exceptions
+CPPFLAGS+= $(CFLAGS) -std=c++2a -ffast-math
 LDFLAGS	+= --section-start=.init=$(LOADADDR)
 
 ifeq ($(strip $(CHECK_DEPS)),1)

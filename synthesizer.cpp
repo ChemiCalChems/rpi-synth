@@ -53,10 +53,9 @@ u32 Synthesizer::get_sample(double t) {
 
 	for (unsigned i = 0; i < key_velocities.size(); i++) {
 		if (key_velocities.at(i) == 0) continue;
-		float f = utils::midi_to_note_freq(i);
+		float f = utils::midi_freqs[i];
 		double intpart;
-		result += ((std::modf(f*t, &intpart) <= 0.5)?high_level:low_level);
-		
+		result += ((std::modf(f*t, &intpart) <= (0.7f /*+ 0.4 * std::sin(3.1415*t) */) ) ? high_level : low_level);		 
 	}
 	
 	return result;
