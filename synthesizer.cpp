@@ -10,8 +10,8 @@ unsigned char nibble(unsigned char byte, bool first = true) {
 
 
 Synthesizer::Synthesizer(CInterruptSystem* interrupt_system)
-	: CPWMSoundBaseDevice(interrupt_system, 44100, 512),
-	  serial(interrupt_system, true) {
+	: CPWMSoundBaseDevice(interrupt_system, 44100, 512) {
+	MidiManager::get().add_listener(this);
 }
 
 
@@ -69,97 +69,22 @@ unsigned char Synthesizer::get_key_velocity(unsigned int key) {
 	return key_velocities[key];
 }
 
-void Synthesizer::process(CLogger& logger) {
+void Synthesizer::start() {
 	if (!Start()) {
 		CLogger::Get()->Write("Synthesizer::process()", LogWarning, "Couldn't start SoundDevice");
 	}
+}
 
-	serial.Initialize(38400);
-	
-	int n = 0;
-	std::queue<unsigned char> bytes_read;
-
-	while(true) {		
-		//CLogger::Get()->Write("Synthesizer::process()", LogNotice, std::to_string(bytes_read.size()).c_str());
-		unsigned char buffer [64];
-		int byte_count = serial.Read(buffer, sizeof buffer);
-		if (byte_count <= 0) continue;
-
-		//CLogger::Get()->Write("process()", LogNotice, std::to_string(byte_count).c_str());
-		
-		for (unsigned int i = 0; i<byte_count; i++)
-			bytes_read.push(buffer[i]);
-		 	
-		bool keepReading = true;	
-		while (keepReading && !bytes_read.empty()) {
-			auto byte = bytes_read.front();
-			
-			switch(nibble(byte)) {
-			case 8: //1000 : noteOff
-				{
-					if (bytes_read.size() < 3) {
-						keepReading = false;
-						break;
-					}
-					bytes_read.pop();
-
-					unsigned char key;
-					key = bytes_read.front(); bytes_read.pop();
-					/*velocity = bytes_read.front();*/ bytes_read.pop();
-					Synthesizer::set_key_velocity(key, 0);
-					//logger.Write("e", LogNotice, "OOOOOO");
-					break;
-				}
-			case 9: //1001 : noteOn
-				{
-					if (bytes_read.size() < 3) {
-						keepReading = false;
-						break;
-					}
-					bytes_read.pop();
-					
-					unsigned char key, velocity;
-					key = bytes_read.front(); bytes_read.pop();
-					velocity = bytes_read.front(); bytes_read.pop();
-					Synthesizer::set_key_velocity(key, 128);
-					//logger.Write("e", LogNotice, "EEEEE");
-					break;
-				}
-				/*
-			case 12: //1100 : programChange
-				{
-					if (bytes_read.size() < 2) {
-						keepReading = false;
-						break;
-					}
-					bytes_read.pop();
-
-					unsigned char program = bytes_read.front();
-					bytes_read.pop();
-					std::cout << "setting" << (int)program << std::endl;
-					Synthesizer::set_patch(patches.at(program));
-					break;
-					}
-				*/
-			case 14: //1110 : pitchbend
-				{
-					if (bytes_read.size() < 3) {
-						keepReading = false;
-						break;
-					}
-					bytes_read.pop();
-					unsigned char lsb = bytes_read.front(); bytes_read.pop();
-					unsigned char msb = bytes_read.front(); bytes_read.pop();
-
-					short pitchbend = ((short)msb << 7) + lsb;
-					double semitones = (double)(pitchbend - 8192) / 16834.f;
-					Synthesizer::pitch_bend_semitones = semitones;
-					break;
-				}
-			default: bytes_read.pop();
-			}
-		}
+void Synthesizer::midi_callback(MidiEvent event) {
+	switch(event.type) {
+	case MidiEvent::Type::noteoff:
+		Synthesizer::set_key_velocity(event.note.key, 0);
+		break;
+	case MidiEvent::Type::noteon:
+		Synthesizer::set_key_velocity(event.note.key, 128);
+		break;
 	}
+	
 }
 
 unsigned Synthesizer::GetChunk(u32* buf, unsigned chunk_size) {

@@ -18,6 +18,7 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 #include "kernel.h"
+#include "midi.hpp"
 
 static const char FromKernel[] = "kernel";
 
@@ -82,7 +83,8 @@ TShutdownMode CKernel::Run (void)
 
 	//for (unsigned nCount = 0; m_MiniOrgan.IsActive (); nCount++)
 	//{
-	synth.process(m_Logger);
+	synth.start();
+	MidiManager::get().run();
 
 	//m_Screen.Rotor (0, nCount);
 	//}
