@@ -15,7 +15,7 @@ public:
 		
 		std::string streamName;
 		float leftrightFade = 0.1f;
-		float volume = 0.01f;
+		float volume = 0.05f;
 
 		int lowLevel(), highLevel(), nullLevel();
 		

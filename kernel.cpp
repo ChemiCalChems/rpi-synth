@@ -21,6 +21,8 @@
 #include "midi.hpp"
 #include "midiinput.hpp"
 #include "sequencer.hpp"
+#include <circle/usb/usbkeyboard.h>
+#include <cstring>
 
 static const char FromKernel[] = "kernel";
 
@@ -28,9 +30,8 @@ CKernel::CKernel (void)
 :	m_Screen (m_Options.GetWidth (), m_Options.GetHeight ()),
 	m_Timer (&m_Interrupt),
 	m_Logger (m_Options.GetLogLevel (), &m_Timer),
-	m_USBHCI (&m_Interrupt, &m_Timer)
-{
-	m_ActLED.Blink (5);	// show we are alive
+	m_USBHCI (&m_Interrupt, &m_Timer) {
+	
 }
 
 CKernel::~CKernel (void)
@@ -74,13 +75,23 @@ boolean CKernel::Initialize (void)
 	return bOK;
 }
 
+void keypressed (const char* c) {
+	if (strcmp(c, " ") == 0) {
+		if (Sequencer::get().loop.status == Sequencer::Loop::Status::stopped)
+			Sequencer::get().loop.status = Sequencer::Loop::Status::recording;
+		else
+			Sequencer::get().loop.status = Sequencer::Loop::Status::playing;
+	}
+}
+
 TShutdownMode CKernel::Run (void)
 {
 	m_Logger.Write (FromKernel, LogNotice, "Compile time: " __DATE__ " " __TIME__);
+
+	CUSBKeyboardDevice *pKeyboard = (CUSBKeyboardDevice *) m_DeviceNameService.GetDevice ("ukbd1", FALSE);
+
+	pKeyboard->RegisterKeyPressedHandler (keypressed);
 	
-	m_Logger.Write (FromKernel, LogNotice, "Just play!");
-
-
 	Mixer::get().streams.push_back(std::make_unique<Synthesizer>());
 	Mixer::get().init();
 	
@@ -88,8 +99,9 @@ TShutdownMode CKernel::Run (void)
 	while (true) {
 		input.read();
 		MidiManager::get().run();
-		//Sequencer::get().cycle();
+		Sequencer::get().cycle();
 	}
 
 	return ShutdownHalt;
 }
+

@@ -9,27 +9,37 @@
 
 class Sequencer;
 
-class Sequencer {
+class Sequencer : public MidiListener {
+public:
 	class Loop {
-		std::vector<MidiEvent> data;
+		std::vector<std::vector<MidiEvent>> data = {{}};
 		std::size_t counter = 0;
 	public:
+		enum class Status {stopped, playing, recording} status = Status::stopped;
+		
 		void restart() {
 			counter = 0;
 		}
-		const MidiEvent& advance() {
-			if (++counter >= data.size()) counter = 0;
+		std::vector<MidiEvent>& advance() {
+			if (++counter == data.size()) {
+				if (status == Status::playing) counter = 0;
+				else if (status == Status::recording) {
+					data.push_back({});
+				}
+			}
 			return current();
 		}
-		const MidiEvent& current() const {
+		std::vector<MidiEvent>& current() {
 			return data.at(counter);
 		}
 		
 	};
+private:
+	Sequencer() {
+		MidiManager::get().add_listener(this);
+	}
 	
-	Sequencer() {}
 	
-	Loop loop;
 	unsigned long long currentFrame = 0;
 	
 	void tick();
@@ -37,7 +47,7 @@ public:
 	float BPM = 120;
 	const float PPQ = 240;
 
-	enum Status {stopped, paused, playing} status = stopped;
+	Loop loop;
 	
 	Sequencer(Sequencer const&) = delete;
 	void operator=(MidiManager const&) = delete;
@@ -48,4 +58,6 @@ public:
 	}
 
 	void cycle();
+
+	void midi_callback(MidiEvent e) override;
 };
