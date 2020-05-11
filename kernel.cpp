@@ -19,6 +19,8 @@
 //
 #include "kernel.h"
 #include "midi.hpp"
+#include "midiinput.hpp"
+#include "sequencer.hpp"
 
 static const char FromKernel[] = "kernel";
 
@@ -84,8 +86,12 @@ TShutdownMode CKernel::Run (void)
 	//for (unsigned nCount = 0; m_MiniOrgan.IsActive (); nCount++)
 	//{
 	synth.start();
-	MidiManager::get().run();
-
+	MidiInput input;
+	while (true) {
+		input.read();
+		MidiManager::get().run();
+		Sequencer::get().cycle();
+	}
 	//m_Screen.Rotor (0, nCount);
 	//}
 

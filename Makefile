@@ -2,7 +2,7 @@
 # Makefile
 #
 
-OBJS	= main.o kernel.o synthesizer.o midi.o
+OBJS	= main.o kernel.o synthesizer.o midi.o sequencer.o midiinput.o
 
 LIBS	= $(CIRCLEHOME)/lib/usb/libusb.a \
 	  $(CIRCLEHOME)/lib/input/libinput.a \

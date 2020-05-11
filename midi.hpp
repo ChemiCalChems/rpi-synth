@@ -3,10 +3,10 @@
 #include <vector>
 #include <queue>
 #include <circle/serial.h>
+#include <map>
 
 struct MidiEvent {
-	enum class Type {null, noteon, noteoff};
-	Type type;
+	enum class Type {null, noteon, noteoff} type = Type::null;
 
 	struct NoteEvent {
 		unsigned char key, velocity;
@@ -24,11 +24,9 @@ struct MidiListener {
 class MidiManager;
 
 class MidiManager {
-	MidiManager();
-	 
-	
-	CSerialDevice serial;
+	MidiManager() {}
 	std::vector<MidiListener*> listeners;
+	std::queue<MidiEvent> eventQueue;
 	
 	void run_callbacks(MidiEvent event);
 public:
@@ -43,7 +41,8 @@ public:
 	}
 
 	void add_listener(MidiListener* listener);
-
+	void init();
 	void run();
+	void broadcast(const MidiEvent& ev);
 };
 

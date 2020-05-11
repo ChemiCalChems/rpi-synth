@@ -46,6 +46,8 @@ AS	= $(CC)
 LD	= $(PREFIX)ld
 AR	= $(PREFIX)ar
 
+CPPFLAGS += -Wall
+
 ifeq ($(strip $(AARCH)),32)
 ifeq ($(strip $(RASPPI)),1)
 ARCH	?= -DAARCH=32 -mcpu=arm1176jzf-s -marm -mfpu=vfp -mfloat-abi=$(FLOAT_ABI)

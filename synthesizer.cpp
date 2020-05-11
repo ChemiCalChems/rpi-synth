@@ -17,7 +17,7 @@ Synthesizer::Synthesizer(CInterruptSystem* interrupt_system)
 
 
 void Synthesizer::set_patch(std::function<double(int)> f) {
-	for (int i=0; i<harmonics.size(); i++) {
+	for (unsigned i=0; i<harmonics.size(); i++) {
 		harmonics[i] = f(i+1);
 	}
 }
@@ -47,7 +47,7 @@ u32 Synthesizer::get_sample(double t) {
 	return (result + vector_result.sum())/512;
 	*/
 		
-	int low_level = GetRangeMin()/5, high_level = GetRangeMax()/5, null_level = (low_level + high_level)/2;
+	int low_level = GetRangeMin()/10, high_level = GetRangeMax()/10, null_level = (low_level + high_level)/2;
 
 	u32 result = null_level;
 
@@ -83,13 +83,15 @@ void Synthesizer::midi_callback(MidiEvent event) {
 	case MidiEvent::Type::noteon:
 		Synthesizer::set_key_velocity(event.note.key, 128);
 		break;
+	default:
+		break;
 	}
 	
 }
 
 unsigned Synthesizer::GetChunk(u32* buf, unsigned chunk_size) {
 	//CLogger::Get()->Write("a", LogNotice, "AAAAA");
-	for (int i = 0; i<chunk_size; i+=2) {
+	for (unsigned i = 0; i<chunk_size; i+=2) {
 		u32 sample = Synthesizer::get_sample(Synthesizer::t);
 		*buf++ = (u32) sample;
 		*buf++ = (u32) sample;
