@@ -62,8 +62,6 @@ private:
 	CTimer			m_Timer;
 	CLogger			m_Logger;
 	CUSBHCIDevice		m_USBHCI;
-
-	Synthesizer synth;
 };
 
 #endif

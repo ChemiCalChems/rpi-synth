@@ -15,7 +15,7 @@ void Sequencer::cycle() {
 }
 
 void Sequencer::tick() {
-	const MidiEvent ev = loop.advance();
+	const MidiEvent e = loop.advance();
 	
 }
 

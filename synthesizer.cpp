@@ -9,8 +9,8 @@ unsigned char nibble(unsigned char byte, bool first = true) {
 }
 
 
-Synthesizer::Synthesizer(CInterruptSystem* interrupt_system)
-	: CPWMSoundBaseDevice(interrupt_system, 44100, 512) {
+Synthesizer::Synthesizer()
+	: Stream("synth") {
 	MidiManager::get().add_listener(this);
 }
 
@@ -47,15 +47,14 @@ u32 Synthesizer::get_sample(double t) {
 	return (result + vector_result.sum())/512;
 	*/
 		
-	int low_level = GetRangeMin()/10, high_level = GetRangeMax()/10, null_level = (low_level + high_level)/2;
 
-	u32 result = null_level;
+	u32 result = nullLevel();
 
 	for (unsigned i = 0; i < key_velocities.size(); i++) {
 		if (key_velocities.at(i) == 0) continue;
 		float f = utils::midi_freqs[i];
 		double intpart;
-		result += ((std::modf(f*t, &intpart) <= (0.7f /*+ 0.4 * std::sin(3.1415*t) */) ) ? high_level : low_level);		 
+		result += ((std::modf(f*t, &intpart) <= (0.7f /*+ 0.4 * std::sin(3.1415*t) */) ) ? highLevel() : lowLevel());
 	}
 	
 	return result;
@@ -67,12 +66,6 @@ void Synthesizer::set_key_velocity(unsigned int key, unsigned char velocity) {
 
 unsigned char Synthesizer::get_key_velocity(unsigned int key) {
 	return key_velocities[key];
-}
-
-void Synthesizer::start() {
-	if (!Start()) {
-		CLogger::Get()->Write("Synthesizer::process()", LogWarning, "Couldn't start SoundDevice");
-	}
 }
 
 void Synthesizer::midi_callback(MidiEvent event) {
@@ -89,16 +82,11 @@ void Synthesizer::midi_callback(MidiEvent event) {
 	
 }
 
-unsigned Synthesizer::GetChunk(u32* buf, unsigned chunk_size) {
-	//CLogger::Get()->Write("a", LogNotice, "AAAAA");
-	for (unsigned i = 0; i<chunk_size; i+=2) {
-		u32 sample = Synthesizer::get_sample(Synthesizer::t);
-		*buf++ = (u32) sample;
-		*buf++ = (u32) sample;
+u32 Synthesizer::getSample() {
+	u32 sample = Synthesizer::get_sample(Synthesizer::t);
 				
-		Synthesizer::t += (double)1/(double)44100;
-		if (Synthesizer::t > 60) Synthesizer::t = 0;
-	}
-	//CLogger::Get()->Write("a", LogNotice, "A");
-	return chunk_size;
+	Synthesizer::t += (double)1/(double)44100;
+	if (Synthesizer::t > 60) Synthesizer::t = 0;
+
+	return sample;
 }

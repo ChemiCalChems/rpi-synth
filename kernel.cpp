@@ -28,8 +28,7 @@ CKernel::CKernel (void)
 :	m_Screen (m_Options.GetWidth (), m_Options.GetHeight ()),
 	m_Timer (&m_Interrupt),
 	m_Logger (m_Options.GetLogLevel (), &m_Timer),
-	m_USBHCI (&m_Interrupt, &m_Timer),
-	synth (&m_Interrupt)
+	m_USBHCI (&m_Interrupt, &m_Timer)
 {
 	m_ActLED.Blink (5);	// show we are alive
 }
@@ -81,19 +80,16 @@ TShutdownMode CKernel::Run (void)
 	
 	m_Logger.Write (FromKernel, LogNotice, "Just play!");
 
-	//m_MiniOrgan.Start ();
 
-	//for (unsigned nCount = 0; m_MiniOrgan.IsActive (); nCount++)
-	//{
-	synth.start();
+	Mixer::get().streams.push_back(std::make_unique<Synthesizer>());
+	Mixer::get().init();
+	
 	MidiInput input;
 	while (true) {
 		input.read();
 		MidiManager::get().run();
-		Sequencer::get().cycle();
+		//Sequencer::get().cycle();
 	}
-	//m_Screen.Rotor (0, nCount);
-	//}
 
 	return ShutdownHalt;
 }
