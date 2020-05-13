@@ -68,7 +68,7 @@ void keypressed (const char* c) {
 TShutdownMode CKernel::Run (void)
 {
 	m_Logger.Write (FromKernel, LogNotice, "Compile time: " __DATE__ " " __TIME__);
-
+	
 	CUSBKeyboardDevice *pKeyboard = (CUSBKeyboardDevice *) m_DeviceNameService.GetDevice ("ukbd1", FALSE);
 
 	pKeyboard->RegisterKeyPressedHandler (keypressed);
@@ -79,8 +79,8 @@ TShutdownMode CKernel::Run (void)
 	MidiInput input;
 	while (true) {
 		input.read();
-		MidiManager::get().run();
 		Sequencer::get().cycle();
+		MidiManager::get().run();
 	}
 
 	return ShutdownHalt;

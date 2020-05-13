@@ -5,7 +5,8 @@
 #include <vector>
 #include <array>
 #include <utility>
-
+#include <chrono>
+#include <circle/timer.h>
 
 class Sequencer;
 
@@ -37,16 +38,18 @@ public:
 private:
 	Sequencer() {
 		MidiManager::get().add_listener(this);
+		lastTick = CTimer::GetClockTicks();
 	}
 	
 	
 	unsigned long long currentFrame = 0;
 	
+	unsigned lastTick;
 	void tick();
 public:
-	float BPM = 120;
-	const float PPQ = 240;
-
+	float BPM = 180;
+	const float PPQ = 24;
+	unsigned cycles = 0;
 	Loop loop;
 	
 	Sequencer(Sequencer const&) = delete;
