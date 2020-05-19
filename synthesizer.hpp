@@ -5,16 +5,17 @@
 #include "mixer.hpp"
 #include <circle/logger.h>
 #include "midi.hpp"
+#include <memory>
+#include "waveform.hpp"
 
 const unsigned short nh = 32;
 
 class Synthesizer : public Mixer::Stream, public MidiListener {
 	std::array<unsigned char, 128> key_velocities = {0};
 	std::array<double, 16384> harmonics = {0};
+	std::unique_ptr<Waveform> waveform;
 public:
-	double t = 0;
-
-	Synthesizer();
+	Synthesizer(std::unique_ptr<Waveform> waveform_);
 	
 	double pitch_bend_semitones = 0;
 	void set_patch(std::function<double(int)> f);
@@ -23,5 +24,5 @@ public:
 	unsigned char get_key_velocity(unsigned int key);
 
 	void midi_callback(MidiEvent event);
-	u32 getSample() override;
+	u32 getSample(long double t) override;
 };

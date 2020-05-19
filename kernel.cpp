@@ -4,6 +4,7 @@
 #include "sequencer.hpp"
 #include <circle/usb/usbkeyboard.h>
 #include <cstring>
+#include "waveform.hpp"
 
 static const char FromKernel[] = "kernel";
 
@@ -72,8 +73,7 @@ TShutdownMode CKernel::Run (void)
 	CUSBKeyboardDevice *pKeyboard = (CUSBKeyboardDevice *) m_DeviceNameService.GetDevice ("ukbd1", FALSE);
 
 	pKeyboard->RegisterKeyPressedHandler (keypressed);
-	
-	Mixer::get().streams.push_back(std::make_unique<Synthesizer>());
+	Mixer::get().streams.push_back(std::make_unique<Synthesizer>(std::make_unique<WaveformBase<0>>()));
 	Mixer::get().init();
 	
 	MidiInput input;

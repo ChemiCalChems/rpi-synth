@@ -12,8 +12,9 @@ int Mixer::Stream::nullLevel() {
 	return (lowLevel()+highLevel())/2;
 }
 
-Mixer::Mixer(CInterruptSystem* interrupt_system)
-	: CPWMSoundBaseDevice(interrupt_system, 44100, 512) {
+Mixer::Mixer(CInterruptSystem* interrupt_system, unsigned samplerate_)
+	: CPWMSoundBaseDevice(interrupt_system, samplerate_, 512) {
+	samplerate = samplerate_;
 }
 
 unsigned Mixer::GetChunk (u32* buf, unsigned chunk_size) {
@@ -21,12 +22,16 @@ unsigned Mixer::GetChunk (u32* buf, unsigned chunk_size) {
 		u32 sample = (GetRangeMin() + GetRangeMax())/2;
 
 		for (auto& stream : streams) {
-			sample += stream->getSample();
+			sample += stream->getSample(t);
 		}
 		
 		*buf++ = sample;
 		*buf++ = sample;
+
+		t += 1.L/samplerate;
+		if (t > 60) t = 0;
 	}
 
 	return chunk_size;
 }
+

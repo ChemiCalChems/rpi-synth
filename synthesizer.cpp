@@ -9,8 +9,9 @@ unsigned char nibble(unsigned char byte, bool first = true) {
 }
 
 
-Synthesizer::Synthesizer()
-	: Stream("synth") {
+Synthesizer::Synthesizer(std::unique_ptr<Waveform> waveform_)
+	: Stream("synth"),
+	  waveform(std::move(waveform_)) {
 	MidiManager::get().add_listener(this);
 }
 
@@ -22,7 +23,7 @@ void Synthesizer::set_patch(std::function<double(int)> f) {
 	}
 }
 
-u32 Synthesizer::get_sample(double t) {
+u32 Synthesizer::getSample(long double t) {
 	/* ADDITIVE SYNTHESIS */
 	/*
 	Vc::float_v vector_result = Vc::float_v::Zero();
@@ -49,12 +50,11 @@ u32 Synthesizer::get_sample(double t) {
 		
 
 	u32 result = nullLevel();
-
+	
 	for (unsigned i = 0; i < key_velocities.size(); i++) {
 		if (key_velocities.at(i) == 0) continue;
 		float f = utils::midi_freqs[i];
-		double intpart;
-		result += ((std::modf(f*t, &intpart) <= (0.7f /*+ 0.4 * std::sin(3.1415*t) */) ) ? highLevel() : lowLevel());
+	    result += utils::mapToRange(waveform->getSample(f,t), lowLevel(), highLevel());
 	}
 	
 	return result;
@@ -78,15 +78,6 @@ void Synthesizer::midi_callback(MidiEvent event) {
 		break;
 	default:
 		break;
-	}
-	
+	}	
 }
 
-u32 Synthesizer::getSample() {
-	u32 sample = Synthesizer::get_sample(Synthesizer::t);
-				
-	Synthesizer::t += (double)1/(double)44100;
-	if (Synthesizer::t > 60) Synthesizer::t = 0;
-
-	return sample;
-}
