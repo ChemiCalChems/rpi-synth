@@ -20,3 +20,15 @@ template<>
 class WaveformBase<1> : public Waveform { //sine
 	double getSample(float f, long double t) override;
 };
+
+template<>
+class WaveformBase<2> : public Waveform { //sawtooth
+	double getSample(float f, long double t) override;
+};
+
+template<>
+class WaveformBase<3> : public Waveform { //triangle
+	double getSample(float f, long double t) override;
+};
+
+
