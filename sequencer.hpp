@@ -38,18 +38,10 @@ public:
 private:
 	Sequencer() {
 		MidiManager::get().add_listener(this);
-		lastTick = CTimer::GetClockTicks();
 	}
-	
-	
+		
 	unsigned long long currentFrame = 0;
-	
-	unsigned lastTick;
-	void tick();
 public:
-	float BPM = 180;
-	const float PPQ = 24;
-	unsigned cycles = 0;
 	Loop loop;
 	
 	Sequencer(Sequencer const&) = delete;
@@ -60,7 +52,7 @@ public:
 		return instance;
 	}
 
-	void cycle();
-
 	void midi_callback(MidiEvent e) override;
+
+	void ppq();
 };

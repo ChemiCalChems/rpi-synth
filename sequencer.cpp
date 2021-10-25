@@ -2,21 +2,10 @@
 #include <chrono>
 #include <circle/logger.h>
 #include <charconv>
+#include "clock.hpp"
 
-void Sequencer::cycle() {
-	static unsigned usTillNextTick = 60*1000000/(BPM*PPQ);
-	unsigned now = CTimer::GetClockTicks();
-	auto usSinceLastTick = now - lastTick;
-	//CLogger::Get()->Write ("", LogNotice, std::to_string(usSinceLastTick).c_str());
-	if (usSinceLastTick >= usTillNextTick) {
-		usTillNextTick = 2*60*1000000/(BPM*PPQ) - usSinceLastTick;
-		lastTick = now;
-		tick();
-	}
-}
-
-void Sequencer::tick() {
-	/*static int i=0;
+void Sequencer::ppq() {
+	static int i=0;
 	if (i == 0) {
 		MidiEvent e;
 		e.type = MidiEvent::Type::noteon;
@@ -24,17 +13,17 @@ void Sequencer::tick() {
 		e.note.velocity = 128;
 		MidiManager::get().broadcast(e);
 	}
-	if (i == 4) {
+	if (i == Clock::get().PPQ/4) {
 		MidiEvent e;
 		e.type = MidiEvent::Type::noteoff;
 		e.note.key = 60;
 		e.note.velocity = 128;
 		MidiManager::get().broadcast(e);
 	}
-	if (++i == PPQ) {
+	if (++i == Clock::get().PPQ) {
 		i = 0;
-		CLogger::Get()->Write("", LogNotice, "q");
-	}*/
+		//CLogger::Get()->Write("", LogNotice, "q");
+	}
 	
 	
 	if (loop.status != Loop::Status::stopped) loop.advance();

@@ -5,6 +5,7 @@
 #include <circle/usb/usbkeyboard.h>
 #include <cstring>
 #include "waveform.hpp"
+#include "clock.hpp"
 
 static const char FromKernel[] = "kernel";
 
@@ -13,7 +14,6 @@ CKernel::CKernel (void)
 	m_Timer (&m_Interrupt),
 	m_Logger (m_Options.GetLogLevel (), &m_Timer),
 	m_USBHCI (&m_Interrupt, &m_Timer) {
-	
 }
 
 CKernel::~CKernel (void)
@@ -49,11 +49,6 @@ boolean CKernel::Initialize (void)
 		bOK = m_USBHCI.Initialize ();
 	}
 
-	if (bOK)
-	{
-		//bOK = m_MiniOrgan.Initialize ();
-	}
-
 	return bOK;
 }
 
@@ -73,13 +68,15 @@ TShutdownMode CKernel::Run (void)
 	CUSBKeyboardDevice *pKeyboard = (CUSBKeyboardDevice *) m_DeviceNameService.GetDevice ("ukbd1", FALSE);
 
 	pKeyboard->RegisterKeyPressedHandler (keypressed);
-	Mixer::get().streams.push_back(std::make_unique<Synthesizer>(std::make_unique<WaveformBase<0>>()));
+	Mixer::get().streams.push_back(std::make_unique<Synthesizer>(std::make_unique<WaveformBase<3>>()));
 	Mixer::get().init();
 	
 	MidiInput input;
+	Clock::get();
+	Sequencer::get();
+	CLogger::Get()->Write(FromKernel, LogNotice, "Startup done");
 	while (true) {
 		input.read();
-		Sequencer::get().cycle();
 		MidiManager::get().run();
 	}
 

@@ -9,7 +9,7 @@ include $(CIRCLESTDLIBHOME)/Config.mk
 CIRCLEHOME = $(CIRCLESTDLIBHOME)/libs/circle
 NEWLIBDIR = $(CIRCLESTDLIBHOME)/install/$(NEWLIB_ARCH)
 
-OBJS	= main.o kernel.o synthesizer.o midi.o sequencer.o midiinput.o mixer.o waveform.o
+OBJS	= main.o kernel.o synthesizer.o midi.o sequencer.o midiinput.o mixer.o waveform.o clock.o
 
 include $(CIRCLEHOME)/Rules.mk
 

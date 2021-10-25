@@ -2,6 +2,7 @@
 
 #include "midi.hpp"
 #include <circle/serial.h>
+#include <queue>
 
 class MidiInput {
 	CSerialDevice serial;

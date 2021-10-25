@@ -14,12 +14,11 @@ void MidiManager::init() {
 }
 
 void MidiManager::broadcast(const MidiEvent& ev) {
-	eventQueue.push(ev);
+	eventBuffer.push(ev);
 }
 
 void MidiManager::run() {
-	while (!eventQueue.empty()) {
-		run_callbacks(eventQueue.front());
-		eventQueue.pop();
+	while (!eventBuffer.empty()) {
+		run_callbacks(eventBuffer.pop());
 	}
 }

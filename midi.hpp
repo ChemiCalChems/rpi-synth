@@ -1,9 +1,9 @@
 #pragma once
 
 #include <vector>
-#include <queue>
 #include <circle/serial.h>
 #include <map>
+#include "utils.hpp"
 
 struct MidiEvent {
 	enum class Type {null, noteon, noteoff} type = Type::null;
@@ -24,9 +24,12 @@ struct MidiListener {
 class MidiManager;
 
 class MidiManager {
+	template <typename T, std::size_t N>
+	using Buffer = utils::Buffer<T,N>;
+	
 	MidiManager() {}
 	std::vector<MidiListener*> listeners;
-	std::queue<MidiEvent> eventQueue;
+	Buffer<MidiEvent, 1024> eventBuffer;
 	
 	void run_callbacks(MidiEvent event);
 public:
