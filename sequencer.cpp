@@ -22,7 +22,6 @@ void Sequencer::ppq() {
 	}
 	if (++i == Clock::get().PPQ) {
 		i = 0;
-		//CLogger::Get()->Write("", LogNotice, "q");
 	}
 	
 	

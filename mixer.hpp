@@ -4,6 +4,8 @@
 #include <circle/pwmsounddevice.h>
 #include <memory>
 #include <circle/logger.h>
+#include "utils.hpp"
+#include <utility> //pair
 
 class Mixer : public CPWMSoundBaseDevice {
 public:
@@ -24,9 +26,10 @@ public:
 	};
 private:	
 	Mixer (CInterruptSystem* interrupt_system, unsigned samplerate = 44100);
-	long double t = 0;
+	utils::Buffer<std::pair<u32, u32>, 512> buffer; //Used to preprocess data to be sent on GetChunk call
 public:
-	unsigned samplerate = 44100;
+	long double t = 0;
+	unsigned samplerate;
 	std::vector<std::unique_ptr<Stream>> streams;
 	
 	Mixer(Mixer const&) = delete;
@@ -42,6 +45,8 @@ public:
 			CLogger::Get()->Write("", LogError, "Couldn't start mixer!");
 		}
 	}
+	
+	void requestSamples(); //Requests samples from associated streams to fill up buffer
 
-	unsigned GetChunk (u32* buffer, unsigned chunk_size);
+	unsigned GetChunk (u32* buffer, unsigned chunk_size) override;
 };

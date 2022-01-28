@@ -32,21 +32,28 @@ namespace utils {
 			return it;
 		}
 	public:
+		std::size_t size = 0;
 		void push(T t) {
 			assert(next(inputIterator) != outputIterator); //Buffer full!
 			*inputIterator = t;
 			inputIterator = next(inputIterator);
+			size++;
 		}
 
 		T pop() {
 			assert(outputIterator != inputIterator); //Buffer empty!
 			T result = *outputIterator;
 			outputIterator = next(outputIterator);
+			size--;
 			return result;
 		}	
 
 		[[nodiscard]] bool empty() {
 			return outputIterator == inputIterator;
+		}
+
+		[[nodiscard]] bool full() {
+			return next(inputIterator) == outputIterator;
 		}
 	};
 }

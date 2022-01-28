@@ -69,15 +69,16 @@ TShutdownMode CKernel::Run (void)
 
 	pKeyboard->RegisterKeyPressedHandler (keypressed);
 	Mixer::get().streams.push_back(std::make_unique<Synthesizer>(std::make_unique<WaveformBase<3>>()));
-	Mixer::get().init();
 	
 	MidiInput input;
 	Clock::get();
 	Sequencer::get();
 	CLogger::Get()->Write(FromKernel, LogNotice, "Startup done");
+	Mixer::get().init();
 	while (true) {
 		input.read();
 		MidiManager::get().run();
+		Mixer::get().requestSamples();
 	}
 
 	return ShutdownHalt;
