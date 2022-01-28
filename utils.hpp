@@ -33,27 +33,29 @@ namespace utils {
 		}
 	public:
 		std::size_t size = 0;
+
+		[[nodiscard]] inline bool empty() {
+			return outputIterator == inputIterator;
+		}
+
+		[[nodiscard]] inline bool full() {
+			return next(inputIterator) == outputIterator;
+		}
+
 		void push(T t) {
-			assert(next(inputIterator) != outputIterator); //Buffer full!
+			assert(!full());
 			*inputIterator = t;
 			inputIterator = next(inputIterator);
 			size++;
 		}
 
 		T pop() {
-			assert(outputIterator != inputIterator); //Buffer empty!
+			assert(!empty());
 			T result = *outputIterator;
 			outputIterator = next(outputIterator);
 			size--;
 			return result;
 		}	
 
-		[[nodiscard]] bool empty() {
-			return outputIterator == inputIterator;
-		}
-
-		[[nodiscard]] bool full() {
-			return next(inputIterator) == outputIterator;
-		}
 	};
 }
