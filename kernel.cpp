@@ -78,7 +78,7 @@ TShutdownMode CKernel::Run (void)
 	while (true) {
 		input.read();
 		MidiManager::get().run();
-		Mixer::get().requestSamples();
+		Mixer::get().fillBuffer();
 	}
 
 	return ShutdownHalt;

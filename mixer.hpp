@@ -46,7 +46,8 @@ public:
 		}
 	}
 	
-	void requestSamples(); //Requests samples from associated streams to fill up buffer
+	std::pair<u32, u32> requestSample(); //Requests samples from associated streams
+	void fillBuffer();
 
 	unsigned GetChunk (u32* buffer, unsigned chunk_size) override;
 };
