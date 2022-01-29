@@ -8,14 +8,11 @@ unsigned char nibble(unsigned char byte, bool first = true) {
 	return first ? byte >> 4 : byte % 16;
 }
 
-
 Synthesizer::Synthesizer(std::unique_ptr<Waveform> waveform_)
 	: Stream("synth"),
 	  waveform(std::move(waveform_)) {
 	MidiManager::get().add_listener(this);
 }
-
-
 
 void Synthesizer::set_patch(std::function<double(int)> f) {
 	for (unsigned i=0; i<harmonics.size(); i++) {
@@ -48,13 +45,12 @@ u32 Synthesizer::getSample(long double t) {
 	return (result + vector_result.sum())/512;
 	*/
 		
-
 	u32 result = nullLevel();
 	
 	for (unsigned i = 0; i < key_velocities.size(); i++) {
 		if (key_velocities.at(i) == 0) continue;
 		float f = utils::midi_freqs[i];
-	    result += utils::mapToRange(waveform->getSample(f,t), lowLevel(), highLevel());
+		result += utils::mapToRange(waveform->getSample(f,t), lowLevel(), highLevel());
 	}
 	
 	return result;
