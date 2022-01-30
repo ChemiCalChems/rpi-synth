@@ -2,7 +2,7 @@
 #include <circle/logger.h>
 
 MidiInput::MidiInput()
-	: serial(CInterruptSystem::Get()) {
+	: serial() {
 	if (!serial.Initialize(38400)) CLogger::Get()->Write("a", LogError, "couldn't init serial");
 	CLogger::Get()->Write("a", LogNotice, "started serial");
 }
