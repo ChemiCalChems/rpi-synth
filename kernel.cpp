@@ -68,7 +68,7 @@ TShutdownMode CKernel::Run (void)
 	CUSBKeyboardDevice *pKeyboard = (CUSBKeyboardDevice *) m_DeviceNameService.GetDevice ("ukbd1", FALSE);
 
 	pKeyboard->RegisterKeyPressedHandler (keypressed);
-	Mixer::get().streams.push_back(std::make_unique<Synthesizer>(std::make_unique<WaveformBase<3>>()));
+	Mixer::get().streams.push_back(std::make_unique<Synthesizer>(std::make_unique<WaveformBase<1>>()));
 	
 	MidiInput input;
 	Clock::get();
@@ -76,6 +76,11 @@ TShutdownMode CKernel::Run (void)
 	CLogger::Get()->Write(FromKernel, LogNotice, "Startup done");
 	Mixer::get().init();
 	while (true) {
+		if (Mixer::get().debugReady) {
+			std::string msg = std::to_string(Mixer::get().sampleCountBeforeCallback);
+			if (Mixer::get().sampleCountBeforeCallback != 512) m_Logger.Write(FromKernel, LogDebug, msg.c_str());
+			Mixer::get().debugReady = false;
+		}
 		input.read();
 		MidiManager::get().run();
 		Mixer::get().fillBuffer();

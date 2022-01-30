@@ -50,4 +50,8 @@ public:
 	void fillBuffer();
 
 	unsigned GetChunk (u32* buffer, unsigned chunk_size) override;
+	
+	/*DEBUG INFO*/
+	bool debugReady = false;
+	unsigned int sampleCountBeforeCallback = 0;
 };

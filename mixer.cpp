@@ -34,12 +34,14 @@ std::pair<u32, u32> Mixer::requestSample() {
 
 void Mixer::fillBuffer() {
 	if (!buffer.full()) {
-		auto sample = requestSample();
-		buffer.push(sample);
+		buffer.push(requestSample());
 	}
 }
 
 unsigned Mixer::GetChunk (u32* buf, unsigned chunk_size) {
+	sampleCountBeforeCallback = buffer.size;
+	debugReady = true;
+
 	for (unsigned i = 0; i<chunk_size; i+=2) {
 		std::pair<u32, u32> sample;
 		if (buffer.empty()) [[unlikely]] {
