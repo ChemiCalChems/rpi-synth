@@ -26,7 +26,7 @@ public:
 	};
 private:	
 	Mixer (CInterruptSystem* interrupt_system, unsigned samplerate = 44100);
-	utils::Buffer<std::pair<u32, u32>, 512> buffer; //Used to preprocess data to be sent on GetChunk call
+	utils::Buffer<std::pair<u32, u32>, 256> buffer; //Used to preprocess data to be sent on GetChunk call
 public:
 	long double t = 0;
 	unsigned samplerate;

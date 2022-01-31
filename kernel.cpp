@@ -78,7 +78,7 @@ TShutdownMode CKernel::Run (void)
 	while (true) {
 		if (Mixer::get().debugReady) {
 			std::string msg = std::to_string(Mixer::get().sampleCountBeforeCallback);
-			if (Mixer::get().sampleCountBeforeCallback != 512) m_Logger.Write(FromKernel, LogDebug, msg.c_str());
+			if (Mixer::get().sampleCountBeforeCallback != 256) m_Logger.Write(FromKernel, LogDebug, msg.c_str());
 			Mixer::get().debugReady = false;
 		}
 		input.read();
