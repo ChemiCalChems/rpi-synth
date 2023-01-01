@@ -34,10 +34,7 @@ public:
 		
 	};
 private:
-	Sequencer() {
-		MidiManager::get().add_listener(this);
-	}
-		
+	Sequencer() = default;
 	unsigned long long currentFrame = 0;
 public:
 	Loop loop;

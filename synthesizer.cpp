@@ -11,7 +11,6 @@ unsigned char nibble(unsigned char byte, bool first = true) {
 Synthesizer::Synthesizer(std::unique_ptr<Waveform> waveform_)
 	: Stream("synth"),
 	  waveform(std::move(waveform_)) {
-	MidiManager::get().add_listener(this);
 }
 
 void Synthesizer::set_patch(std::function<double(int)> f) {

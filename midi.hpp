@@ -17,11 +17,7 @@ struct MidiEvent {
 	};
 };
 
-struct MidiListener {
-	virtual void midi_callback(MidiEvent) = 0;
-};
-
-class MidiManager;
+class MidiListener;
 
 class MidiManager {
 	template <typename T, std::size_t N>
@@ -47,5 +43,13 @@ public:
 	void init();
 	void run();
 	void broadcast(const MidiEvent& ev);
+};
+
+struct MidiListener {
+	virtual void midi_callback(MidiEvent) = 0;
+	MidiListener()
+	{
+		MidiManager::get().add_listener(this);
+	}
 };
 
