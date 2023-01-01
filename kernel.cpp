@@ -80,7 +80,7 @@ TShutdownMode CKernel::Run (void)
 	//CUSBKeyboardDevice *pKeyboard = (CUSBKeyboardDevice *) m_DeviceNameService.GetDevice ("ukbd1", FALSE);
 
 	//pKeyboard->RegisterKeyPressedHandler (keypressed);
-	Mixer::get().streams.push_back(std::make_unique<Synthesizer>(std::make_unique<WaveformBase<0>>()));
+	Mixer::get().streams.push_back(std::make_unique<Synthesizer>(std::make_unique<WaveformBase<0>>(440.)));
 	
 	MidiInput input{CInterruptSystem::Get()};
 	//Sequencer::get();

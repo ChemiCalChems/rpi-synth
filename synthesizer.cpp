@@ -50,7 +50,7 @@ u32 Synthesizer::getSample(long double t) {
 	for (unsigned i = 0; i < key_velocities.size(); i++) {
 		if (key_velocities.at(i) == 0) continue;
 		float f = utils::midi_freqs[i];
-		result += utils::mapToRange(waveform->getSample(f,t), lowLevel(), highLevel());
+		result += utils::mapToRange(waveform->getSample(t), lowLevel(), highLevel());
 	}
 	
 	return result;
