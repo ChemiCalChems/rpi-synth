@@ -32,6 +32,11 @@ void Sequencer::ppq() {
 }
 
 void Sequencer::midi_callback(MidiEvent e) {
+	if (e.type == MidiEvent::Type::timingClock)
+	{
+		ppq();
+		return;
+	}
 	if (loop.status != Loop::Status::recording) return;
 
 	loop.current().push_back(e);

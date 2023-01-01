@@ -6,7 +6,7 @@
 #include "utils.hpp"
 
 struct MidiEvent {
-	enum class Type {null, noteon, noteoff} type = Type::null;
+	enum class Type {null, noteon, noteoff, timingClock} type = Type::null;
 
 	struct NoteEvent {
 		unsigned char key, velocity;

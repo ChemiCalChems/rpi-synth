@@ -15,7 +15,7 @@ int Mixer::Stream::nullLevel() {
 }
 
 Mixer::Mixer(CInterruptSystem* interrupt_system, unsigned samplerate_)
-	: CPWMSoundBaseDevice(interrupt_system, samplerate_, 512) {
+	: CPWMSoundBaseDevice(interrupt_system, samplerate_, 384) {
 	samplerate = samplerate_;
 }
 

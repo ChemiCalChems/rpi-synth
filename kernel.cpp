@@ -6,17 +6,29 @@
 #include <cstring>
 #include "waveform.hpp"
 #include "clock.hpp"
+#include <string>
+#include <circle/actled.h>
+
+struct LEDOff
+{
+	CActLED& managedLED;
+	LEDOff(CActLED& led) : managedLED{led}
+	{
+		managedLED.Off();
+	}
+
+	~LEDOff()
+	{
+		managedLED.On();
+	}
+};
 
 static const char FromKernel[] = "kernel";
 
 CKernel::CKernel (void)
 :	m_Screen (m_Options.GetWidth (), m_Options.GetHeight ()),
-	m_Timer (&m_Interrupt),
-	m_Logger (m_Options.GetLogLevel (), &m_Timer),
-	m_USBHCI (&m_Interrupt, &m_Timer) {
-}
-
-CKernel::~CKernel (void)
+	m_Logger (m_Options.GetLogLevel())
+	//m_USBHCI (&m_Interrupt, &m_Timer) 
 {
 }
 
@@ -36,18 +48,18 @@ boolean CKernel::Initialize (void)
 
 	if (bOK)
 	{
-		bOK = m_Interrupt.Initialize ();
+		bOK = CInterruptSystem::Get()->Initialize ();
 	}
 
-	if (bOK)
-	{
-		bOK = m_Timer.Initialize ();
-	}
+	//if (bOK)
+	//{
+	//	bOK = m_Timer.Initialize ();
+	//}
 
-	if (bOK)
-	{
-		bOK = m_USBHCI.Initialize ();
-	}
+	//if (bOK)
+	//{
+	//	bOK = m_USBHCI.Initialize ();
+	//}
 
 	return bOK;
 }
@@ -65,22 +77,25 @@ TShutdownMode CKernel::Run (void)
 {
 	m_Logger.Write (FromKernel, LogNotice, "Compile time: " __DATE__ " " __TIME__);
 	
-	CUSBKeyboardDevice *pKeyboard = (CUSBKeyboardDevice *) m_DeviceNameService.GetDevice ("ukbd1", FALSE);
+	//CUSBKeyboardDevice *pKeyboard = (CUSBKeyboardDevice *) m_DeviceNameService.GetDevice ("ukbd1", FALSE);
 
-	pKeyboard->RegisterKeyPressedHandler (keypressed);
-	Mixer::get().streams.push_back(std::make_unique<Synthesizer>(std::make_unique<WaveformBase<1>>()));
+	//pKeyboard->RegisterKeyPressedHandler (keypressed);
+	Mixer::get().streams.push_back(std::make_unique<Synthesizer>(std::make_unique<WaveformBase<0>>()));
 	
-	MidiInput input;
-	Clock::get();
-	Sequencer::get();
+	MidiInput input{CInterruptSystem::Get()};
+	//Sequencer::get();
 	CLogger::Get()->Write(FromKernel, LogNotice, "Startup done");
 	Mixer::get().init();
 	while (true) {
 		if (Mixer::get().debugReady) {
 			std::string msg = std::to_string(Mixer::get().sampleCountBeforeCallback);
-			if (Mixer::get().sampleCountBeforeCallback != 256) m_Logger.Write(FromKernel, LogDebug, msg.c_str());
+			if (Mixer::get().sampleCountBeforeCallback != 384) m_Logger.Write(FromKernel, LogDebug, msg.c_str());
 			Mixer::get().debugReady = false;
 		}
+		//LEDOff{m_ActLED};
+		//m_Logger.Write(FromKernel, LogDebug, std::to_string(Mixer::get().IsActive()).c_str());
+		if (Mixer::get().IsActive()) m_ActLED.On();
+		else m_ActLED.Off();
 		input.read();
 		MidiManager::get().run();
 		Mixer::get().fillBuffer();

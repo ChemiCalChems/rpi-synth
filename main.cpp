@@ -1,6 +1,14 @@
 #include "kernel.h"
 #include <circle/startup.h>
 
+extern "C"
+{
+	int getentropy(void*, size_t)
+	{
+		return 0;	
+	}
+}
+
 int main (void)
 {
 	// cannot return here because some destructors used in CKernel are not implemented

@@ -8,7 +8,7 @@ long double Waveform::t() {
 
 double WaveformBase<0>::getSample(float f, long double t) {
 	double temp;
-	if (std::modf(f*t, &temp) < 0.7) return 1;
+	if (std::modf(f*t, &temp) < 0.5) return 1;
 	return -1;
 }
 

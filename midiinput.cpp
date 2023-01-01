@@ -1,19 +1,21 @@
 #include "midiinput.hpp"
 #include <circle/logger.h>
+#include <string>
+#include <sstream>
+#include <iomanip>
 
-MidiInput::MidiInput()
-	: serial() {
-	if (!serial.Initialize(38400)) CLogger::Get()->Write("a", LogError, "couldn't init serial");
+MidiInput::MidiInput(CInterruptSystem* interruptSystem)
+	: serial(interruptSystem, true) {
+	if (!serial.Initialize(115200)) CLogger::Get()->Write("a", LogError, "couldn't init serial");
 	CLogger::Get()->Write("a", LogNotice, "started serial");
 }
 
 void MidiInput::read() {
 	unsigned char buffer [128];
-	unsigned byte_count = serial.Read(buffer, sizeof buffer);
+	auto byte_count = serial.Read(buffer, sizeof buffer);
+
 	if (byte_count <= 0) return;
 
-	//CLogger::Get()->Write("process()", LogNotice, std::to_string(byte_count).c_str());
-		
 	for (unsigned int i = 0; i<byte_count; i++)
 		bytes_read.push(buffer[i]);
 		 	
@@ -88,7 +90,19 @@ void MidiInput::read() {
 			  break;
 			  }
 			*/
-		default: bytes_read.pop();
+		case 15: //1111: system message
+			{
+				if (byte == 0b11111000)
+				{
+					e.type = MidiEvent::Type::timingClock;
+				}
+				bytes_read.pop();
+				break;
+			}
+		default: 
+			CLogger::Get()->Write("a", LogNotice, "Bullshit byte");
+			CLogger::Get()->Write("a", LogNotice, std::to_string(byte).c_str());
+			bytes_read.pop();
 		}
 		if (e.type != MidiEvent::Type::null) MidiManager::get().broadcast(e);
 	}

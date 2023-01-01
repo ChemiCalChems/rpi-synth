@@ -25,7 +25,6 @@ class CKernel
 {
 public:
 	CKernel (void);
-	~CKernel (void);
 
 	boolean Initialize (void);
 
@@ -39,10 +38,9 @@ private:
 	CDeviceNameService	m_DeviceNameService;
 	CScreenDevice		m_Screen;
 	CExceptionHandler	m_ExceptionHandler;
-	CInterruptSystem	m_Interrupt;
-	CTimer			m_Timer;
+	CInterruptSystem 	m_InterruptSystem;
+	//CTimer			m_Timer;
 	CLogger			m_Logger;
-	CUSBHCIDevice		m_USBHCI;
 };
 
 #endif

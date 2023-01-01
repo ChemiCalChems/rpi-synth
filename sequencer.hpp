@@ -8,8 +8,6 @@
 #include <chrono>
 #include <circle/timer.h>
 
-class Sequencer;
-
 class Sequencer : public MidiListener {
 public:
 	class Loop {
