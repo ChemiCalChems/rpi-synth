@@ -59,4 +59,19 @@ namespace utils {
 		}	
 
 	};
+
+	template<typename T, std::size_t N, typename ... Args, std::size_t ... Is>
+	std::array<T, N> emplaceArrayHelper(Args&&... args, std::index_sequence<Is...>)
+	{
+		return std::array<T, N>{(Is, T{std::forward<Args>(args)...})...};
+	}
+
+
+	template<typename T, std::size_t N, typename ... Args>
+	std::array<T, N> emplaceArray(Args&&... args)
+	{
+		return emplaceArrayHelper<T, N, Args...>(std::forward<Args>(args)...,
+			std::make_index_sequence<N>());
+	}
+
 }

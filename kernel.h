@@ -12,7 +12,6 @@
 #include <circle/logger.h>
 #include <circle/types.h>
 #include <circle/usb/usbhcidevice.h>
-#include "synthesizer.hpp"
 
 enum TShutdownMode
 {

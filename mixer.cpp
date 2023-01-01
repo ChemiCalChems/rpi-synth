@@ -1,40 +1,53 @@
 #include "mixer.hpp"
 #include <circle/synchronize.h>
 #include <string>
+#include <circle/logger.h>
 
-int Mixer::Stream::lowLevel() {
-	return volume * Mixer::get().GetRangeMin();
-}
-
-int Mixer::Stream::highLevel() {
-	return volume * Mixer::get().GetRangeMax();
-}
-
-int Mixer::Stream::nullLevel() {
-	return (lowLevel()+highLevel())/2;
-}
-
-Mixer::Mixer(CInterruptSystem* interrupt_system, unsigned samplerate_)
-	: CPWMSoundBaseDevice(interrupt_system, samplerate_, 384) {
+Mixer::Mixer(CInterruptSystem* interrupt_system, unsigned int samplerate_)
+	: CPWMSoundBaseDevice(interrupt_system, samplerate_, 384),
+	  voices{utils::emplaceArray<Voice, NUM_VOICES>(samplerate_)},
+	  isVoiceLent{false} {
 	samplerate = samplerate_;
 }
 
 std::pair<u32, u32> Mixer::requestSample() {
 	u32 sample = (GetRangeMin() + GetRangeMax())/2;
 
-	for (auto& stream : streams) {
-		sample += stream->getSample(t);
+	for (std::size_t i = 0; i<voices.size(); i++) {
+		if (isVoiceLent[i] && voices[i].isOn())
+		{
+			sample += utils::mapToRange(voices[i].getSample(), GetRangeMin(), GetRangeMax());
+		}
 	}
 
-	t += 1.L/samplerate;
-	if (t > 60) t = 0;
-	
-	return {sample, sample};
+	return {0.05*sample, 0.05*sample};
 }
 
 void Mixer::fillBuffer() {
 	if (!buffer.full()) {
 		buffer.push(requestSample());
+	}
+}
+Voice* Mixer::requestVoice()
+{
+	//CLogger::Get()->Write("Mixer", LogNotice, "Voice requested");
+	for (std::size_t i = 0; i < isVoiceLent.size(); i++)
+	{
+		if (!isVoiceLent[i]) 
+		{
+			//CLogger::Get()->Write("Mixer", LogNotice, std::to_string(i).c_str());
+			isVoiceLent[i] = true;
+			return &voices[i];
+		}
+	}
+	return nullptr;
+}
+
+void Mixer::returnVoice(Voice* const voice)
+{
+	for (std::size_t i = 0; i < voices.size(); i++)
+	{
+		if (&voices[i] == voice) isVoiceLent[i] = false;
 	}
 }
 

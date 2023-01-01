@@ -4,6 +4,21 @@ Voice::Voice(unsigned int _samplerate) : samplerate{_samplerate}
 {
 }
 
+void Voice::turnOn()
+{
+	on = true;
+}
+
+void Voice::turnOff()
+{
+	on = false;
+}
+
+bool Voice::isOn() const
+{
+	return on;
+}
+
 void Voice::setWaveform(std::unique_ptr<Waveform>&& _waveform)
 {
 	waveform = std::move(_waveform);

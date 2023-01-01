@@ -1,6 +1,5 @@
 #pragma once
 
-#include "synthesizer.hpp"
 #include "midi.hpp"
 #include <vector>
 #include <array>

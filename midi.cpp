@@ -6,6 +6,7 @@ void MidiManager::run_callbacks(MidiEvent event) {
 }
 
 void MidiManager::add_listener(MidiListener* listener) {
+	CLogger::Get()->Write("MidiManager", LogNotice, "Added listener");
 	listeners.push_back(listener);
 }
 

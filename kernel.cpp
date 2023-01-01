@@ -8,6 +8,8 @@
 #include "clock.hpp"
 #include <string>
 #include <circle/actled.h>
+#include "midimapper.hpp"
+#include "mixer.hpp"
 
 struct LEDOff
 {
@@ -80,12 +82,13 @@ TShutdownMode CKernel::Run (void)
 	//CUSBKeyboardDevice *pKeyboard = (CUSBKeyboardDevice *) m_DeviceNameService.GetDevice ("ukbd1", FALSE);
 
 	//pKeyboard->RegisterKeyPressedHandler (keypressed);
-	Mixer::get().streams.push_back(std::make_unique<Synthesizer>(std::make_unique<WaveformBase<0>>(440.)));
 	
 	MidiInput input{CInterruptSystem::Get()};
 	//Sequencer::get();
 	CLogger::Get()->Write(FromKernel, LogNotice, "Startup done");
 	Mixer::get().init();
+	MidiMapper mapper;
+
 	while (true) {
 		if (Mixer::get().debugReady) {
 			std::string msg = std::to_string(Mixer::get().sampleCountBeforeCallback);
@@ -93,9 +96,10 @@ TShutdownMode CKernel::Run (void)
 			Mixer::get().debugReady = false;
 		}
 		//LEDOff{m_ActLED};
-		//m_Logger.Write(FromKernel, LogDebug, std::to_string(Mixer::get().IsActive()).c_str());
+		//m_Logger.Write(FromKernel, LogDebug, std::to_string(memeCount++).c_str());
 		if (Mixer::get().IsActive()) m_ActLED.On();
 		else m_ActLED.Off();
+
 		input.read();
 		MidiManager::get().run();
 		Mixer::get().fillBuffer();
