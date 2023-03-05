@@ -16,8 +16,7 @@ class Mixer : public CPWMSoundBaseDevice {
 	utils::Buffer<std::pair<u32, u32>, 384> buffer; //Used to preprocess data to be sent on GetChunk call
 public:
 	unsigned samplerate;
-	std::array<Voice, NUM_VOICES> voices;
-	std::array<bool, NUM_VOICES> isVoiceLent;
+	std::vector<Voice*> registeredVoices;
 	
 	Mixer(Mixer const&) = delete;
 	void operator=(Mixer const&) = delete;
@@ -36,8 +35,8 @@ public:
 	std::pair<u32, u32> requestSample(); //Requests samples from associated streams
 	void fillBuffer();
 
-	Voice* requestVoice();
-	void returnVoice(Voice* const);
+	void registerVoice(Voice* const);
+	void unregisterVoice(Voice* const);
 
 	unsigned GetChunk (u32* buffer, unsigned chunk_size) override;
 	

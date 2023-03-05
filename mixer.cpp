@@ -2,25 +2,22 @@
 #include <circle/synchronize.h>
 #include <string>
 #include <circle/logger.h>
+#include <algorithm>
 
 Mixer::Mixer(CInterruptSystem* interrupt_system, unsigned int samplerate_)
-	: CPWMSoundBaseDevice(interrupt_system, samplerate_, 384),
-	  voices{utils::emplaceArray<Voice, NUM_VOICES>(samplerate_)},
-	  isVoiceLent{false} {
+	: CPWMSoundBaseDevice(interrupt_system, samplerate_, 384)
+	{
 	samplerate = samplerate_;
 }
 
 std::pair<u32, u32> Mixer::requestSample() {
 	u32 sample = (GetRangeMin() + GetRangeMax())/2;
 
-	for (std::size_t i = 0; i<voices.size(); i++) {
-		if (isVoiceLent[i] && voices[i].isOn())
-		{
-			sample += utils::mapToRange(voices[i].getSample(), GetRangeMin(), GetRangeMax());
-		}
+	for (auto v : registeredVoices) {
+		sample += 0.05 * v->getSample() * (double(GetRangeMax()) - double(GetRangeMin()));
 	}
 
-	return {0.05*sample, 0.05*sample};
+	return {sample, sample};
 }
 
 void Mixer::fillBuffer() {
@@ -28,27 +25,15 @@ void Mixer::fillBuffer() {
 		buffer.push(requestSample());
 	}
 }
-Voice* Mixer::requestVoice()
+void Mixer::registerVoice(Voice* const voice)
 {
-	//CLogger::Get()->Write("Mixer", LogNotice, "Voice requested");
-	for (std::size_t i = 0; i < isVoiceLent.size(); i++)
-	{
-		if (!isVoiceLent[i]) 
-		{
-			//CLogger::Get()->Write("Mixer", LogNotice, std::to_string(i).c_str());
-			isVoiceLent[i] = true;
-			return &voices[i];
-		}
-	}
-	return nullptr;
+	registeredVoices.push_back(voice);
 }
 
-void Mixer::returnVoice(Voice* const voice)
+void Mixer::unregisterVoice(Voice* const voice)
 {
-	for (std::size_t i = 0; i < voices.size(); i++)
-	{
-		if (&voices[i] == voice) isVoiceLent[i] = false;
-	}
+	registeredVoices.erase(std::remove(registeredVoices.begin(), registeredVoices.end(), voice),
+		registeredVoices.end());
 }
 
 unsigned Mixer::GetChunk (u32* buf, unsigned chunk_size) {

@@ -2,6 +2,7 @@
 
 #include "waveform.hpp"
 #include <memory>
+#include "midi.hpp"
 
 class Voice 
 {
@@ -9,6 +10,9 @@ class Voice
 	mutable double t = 0;
 	std::unique_ptr<Waveform> waveform;
 	bool on = false;
+
+	MidiEvent reason;
+
 public:
 	Voice(unsigned int _samplerate);
 
@@ -21,7 +25,11 @@ public:
 	void turnOff();
 	bool isOn() const;
 
-	void setWaveform(std::unique_ptr<Waveform>&&);
+	MidiEvent businessReason() const;
+
 	void resetTime() const;
 	double getSample() const;
+
+	void onKeyPress(const MidiEvent&);
+	void onKeyRelease();
 };

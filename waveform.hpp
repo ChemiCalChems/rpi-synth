@@ -20,16 +20,19 @@ class WaveformBase<0> : public Waveform { //square
 
 template<>
 class WaveformBase<1> : public Waveform { //sine
+	using Waveform::Waveform;
 	double getSample(double t) override;
 };
 
 template<>
 class WaveformBase<2> : public Waveform { //sawtooth
+	using Waveform::Waveform;
 	double getSample(double t) override;
 };
 
 template<>
 class WaveformBase<3> : public Waveform { //triangle
+	using Waveform::Waveform;
 	double getSample(double t) override;
 };
 
