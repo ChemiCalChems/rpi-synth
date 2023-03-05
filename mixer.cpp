@@ -5,9 +5,8 @@
 #include <algorithm>
 
 Mixer::Mixer(CInterruptSystem* interrupt_system, unsigned int samplerate_)
-	: CPWMSoundBaseDevice(interrupt_system, samplerate_, 384)
-	{
-	samplerate = samplerate_;
+	: CPWMSoundBaseDevice(interrupt_system, samplerate_, 384), samplerate{samplerate_}
+{
 }
 
 std::pair<u32, u32> Mixer::requestSample() {

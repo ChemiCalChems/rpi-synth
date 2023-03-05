@@ -32,9 +32,10 @@ void Voice::resetTime() const
 	t = 0;
 }
 
-double Voice::getSample() const
+double Voice::getSample()
 {
-	double result = waveform->getSample(t);
+	double result = adsr(t)*waveform->getSample(t);
+	if (adsr.done) onDone();
 
 	t += 1./double(samplerate);
 	return result;
@@ -42,13 +43,24 @@ double Voice::getSample() const
 
 void Voice::onKeyPress(const MidiEvent& _reason)
 {
+	if (reason.note.key == _reason.note.key)
+	{
+		adsr = ADSREnvelopeGenerator{};
+		return;
+	}
 	reason = _reason;
 	waveform = std::make_unique<WaveformBase<0>>(utils::midi_freqs[reason.note.key]);
 	resetTime();
+	adsr = ADSREnvelopeGenerator{};
 	if (!on) turnOn();
 }
 
 void Voice::onKeyRelease()
+{
+	adsr.released(t);
+}
+
+void Voice::onDone()
 {
 	if (on) turnOff();
 	reason = MidiEvent{};
