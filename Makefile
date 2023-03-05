@@ -2,7 +2,7 @@
 # Makefile
 #
 
-CIRCLESTDLIBHOME = /home/chemicalchems/circle-stdlib
+CIRCLESTDLIBHOME = ./circle-stdlib
 
 include $(CIRCLESTDLIBHOME)/Config.mk
 
