@@ -27,41 +27,39 @@ MidiEvent Voice::businessReason() const
 	return reason;
 }
 
-void Voice::resetTime() const
-{
-	t = 0;
-}
-
 double Voice::getSample()
 {
-	double result = adsr(t)*waveform->getSample(t);
-	if (adsr.done) onDone();
+	double result = patch->getSample();
+	if (patch->isDone()) onDone();
 
-	t += 1./double(samplerate);
 	return result;
 }
 
-void Voice::onKeyPress(const MidiEvent& _reason)
+void Voice::onKeyPress(const MidiEvent& _reason, std::unique_ptr<Patch>&& _patch)
 {
-	if (reason.note.key == _reason.note.key)
-	{
-		adsr = ADSREnvelopeGenerator{};
-		return;
-	}
 	reason = _reason;
-	waveform = std::make_unique<WaveformBase<0>>(utils::midi_freqs[reason.note.key]);
-	resetTime();
-	adsr = ADSREnvelopeGenerator{};
-	if (!on) turnOn();
+
+	patch = std::move(_patch);
+
+	turnOn();
+
+	patch->onKeyPress(_reason);
 }
 
 void Voice::onKeyRelease()
 {
-	adsr.released(t);
+	patch->onKeyRelease();
+}
+
+void Voice::onKeyRepress()
+{
+	patch->onKeyRepress();
 }
 
 void Voice::onDone()
 {
 	if (on) turnOff();
 	reason = MidiEvent{};
+
+	patch.reset();
 }
