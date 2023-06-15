@@ -3,7 +3,7 @@
 
 void TestPatch::onKeyPress(const MidiEvent& event)
 {
-	waveform = std::make_unique<WaveformBase<0>>(utils::midi_freqs[event.note.key]);
+	oscillator.waveform = std::make_unique<WaveformBase<0>>(utils::midi_freqs[event.note.key]);
 	adsr = ADSREnvelopeGenerator{};
 }
 
@@ -25,7 +25,11 @@ bool TestPatch::isDone() const
 
 double TestPatch::getSample()
 {
-	double result = adsr(t)*waveform->getSample(t);
+	requestSample.send();
+
+	double result = adsr(t)*lastSample.value();
+	lastSample.reset();
+
 	if (adsr.done) {done = true;}
 
 	t += 1./double(samplerate);

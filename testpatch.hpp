@@ -3,6 +3,9 @@
 #include "patch.hpp"
 #include <memory>
 #include "waveform.hpp"
+#include "oscillatormodule.hpp"
+#include "port.hpp"
+#include <optional>
 
 struct ADSREnvelopeGenerator
 {
@@ -48,11 +51,17 @@ class TestPatch : public Patch
 	double t = 0;
 	const unsigned int samplerate;
 
-	std::unique_ptr<Waveform> waveform;
+	OscillatorModule oscillator;
+	Port<PortDirection::output> requestSample;
+	Port<PortDirection::input, double> signalIn{[this](double x){lastSample = x;}};
+	std::optional<double> lastSample;
+
 	ADSREnvelopeGenerator adsr;
 public:
-	TestPatch(unsigned int _samplerate) : samplerate{_samplerate}
+	TestPatch(unsigned int _samplerate) : samplerate{_samplerate}, oscillator{samplerate}
 	{
+		oscillator.signalOut.connectTo(signalIn);
+		oscillator.sampleRequested.connectTo(requestSample);
 	}
 
 	void onKeyPress(const MidiEvent&) override;
