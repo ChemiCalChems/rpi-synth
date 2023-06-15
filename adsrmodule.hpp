@@ -20,7 +20,7 @@ struct ADSRModule
 
 	/* To be connected to the patch object
 	 * or whatever logically controls ADSR */
-	Port<PortDirection::input> pressed{[this]{t = 0;}};
+	Port<PortDirection::input> pressed{[this]{t = 0; lastAdsrValue = 0; duringRelease = false;}};
 	Port<PortDirection::input> released {[this]{releasedCallback();}};
 	Port<PortDirection::output> done;
 

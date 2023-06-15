@@ -6,42 +6,7 @@
 #include "oscillatormodule.hpp"
 #include "port.hpp"
 #include <optional>
-
-struct ADSREnvelopeGenerator
-{
-	double attack = 0.005; //s
-	double decay = 0.1; //s
-	double sustain = 0.5;
-	double release = 0.5; //s
-
-	double duringRelease = false;
-	double releaseTime;
-	double valueAtRelease;
-
-	bool done = false;
-
-	double operator()(double t)
-	{
-		if (duringRelease)
-		{
-			if (t >= releaseTime + release)
-			{
-				done = true;
-				return 0;
-			}
-			else return valueAtRelease*(1. - (t - releaseTime)/release);
-		}
-		if (t <= attack) return t / attack;
-		if (t <= attack + decay) return 1. + (t - attack)/decay * (sustain - 1.);
-		return sustain;
-	}
-	void released(double t)
-	{
-		valueAtRelease = operator()(t);
-		releaseTime = t;
-		duringRelease = t;
-	}
-};
+#include "adsrmodule.hpp"
 
 struct MidiEvent;
 
@@ -56,12 +21,20 @@ class TestPatch : public Patch
 	Port<PortDirection::input, double> signalIn{[this](double x){lastSample = x;}};
 	std::optional<double> lastSample;
 
-	ADSREnvelopeGenerator adsr;
+	ADSRModule adsr;
+	Port<PortDirection::output> adsrKeyPressed;
+	Port<PortDirection::output> adsrKeyReleased;
+	Port<PortDirection::input> adsrDone{[this]{done = true;}};
 public:
-	TestPatch(unsigned int _samplerate) : samplerate{_samplerate}, oscillator{samplerate}
+	TestPatch(unsigned int _samplerate) : samplerate{_samplerate}, oscillator{samplerate}, adsr{samplerate}
 	{
-		oscillator.signalOut.connectTo(signalIn);
-		oscillator.sampleRequested.connectTo(requestSample);
+		requestSample.connectTo(oscillator.sampleRequested);
+		oscillator.signalOut.connectTo(adsr.signalIn);
+		adsr.signalOut.connectTo(signalIn);
+
+		adsrKeyPressed.connectTo(adsr.pressed);
+		adsrKeyReleased.connectTo(adsr.released);
+		adsr.done.connectTo(adsrDone);
 	}
 
 	void onKeyPress(const MidiEvent&) override;
