@@ -2,6 +2,8 @@
 
 #include <cmath>
 #include <array>
+#include <algorithm>
+#include <string_view>
 
 namespace utils {
 	[[nodiscard]] static double midi_to_note_freq(int note) {
@@ -73,4 +75,35 @@ namespace utils {
 		return emplaceArrayHelper<T, N, Args...>(std::forward<Args>(args)...,
 			std::make_index_sequence<N>());
 	}
+
+	template<std::size_t N>
+	struct ConstexprString
+	{
+		char data[N];
+
+		constexpr ConstexprString(const char (& _data)[N+1])
+		{
+			std::copy_n(_data, N, data);
+		}
+
+		constexpr operator std::string_view() const
+		{
+			return std::string_view(data, data + N);
+		}
+
+		template<std::size_t M>
+		constexpr auto operator<=>(const ConstexprString<M>& other) const
+		{
+			return std::string_view{*this} <=> std::string_view{other};
+		}
+
+		template<std::size_t M>
+		constexpr bool operator==(const ConstexprString<M>& other) const
+		{
+			return std::string_view{*this} == std::string_view{other};
+		}
+	};
+
+	template<std::size_t M>
+	ConstexprString(const char(&)[M]) -> ConstexprString<M-1>;
 }
