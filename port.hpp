@@ -3,11 +3,22 @@
 #include <type_traits>
 #include <functional>
 #include <utility>
+#include "utils.hpp"
 
 enum class PortDirection {input, output};
 
+class BasePort
+{
+public:
+	[[nodiscard]] virtual bool canConnectTo(const BasePort&) const = 0;
+	[[nodiscard]] virtual bool isConnected() const = 0;
+
+	virtual void connectTo(BasePort&) = 0;
+	virtual void disconnect() = 0;
+};
+
 template<PortDirection portDirection, typename... Ts>
-class Port
+class Port : public BasePort
 {
 	using OppositePortType = Port<portDirection == PortDirection::input ? PortDirection::output : PortDirection::input, Ts...>;
 	friend OppositePortType;
@@ -19,10 +30,10 @@ class Port
 	void onReceive(Args&&... args) const
 	requires ((std::is_convertible_v<Args, Ts> && ...) && portDirection == PortDirection::input)
 	{
-		//if (onReceiveCallback)
-		//{
+		if (onReceiveCallback)
+		{
 			onReceiveCallback(std::forward<Args>(args)...);
-		//}
+		}
 	}
 
 public:
@@ -33,7 +44,12 @@ public:
 		onReceiveCallback = std::forward<F>(f);
 	}
 
-	void disconnect()
+	[[nodiscard]] bool canConnectTo(const BasePort& other) const override
+	{
+		return dynamic_cast<const OppositePortType*>(&other);
+	}
+
+	void disconnect() override
 	{
 		if (!connectedTo) return;
 
@@ -52,24 +68,25 @@ public:
 		connectedTo->connectedTo = this;
 	}
 
-	bool isConnected() const
+	void connectTo(BasePort& other) override
+	{
+		connectTo(dynamic_cast<OppositePortType&>(other));
+	}
+
+	[[nodiscard]] bool isConnected() const override
 	{
 		return connectedTo;
 	}
 
 	template<typename... Args>
 	void send(Args&&... args) const
-	requires (std::is_convertible_v<Args, Ts> && ...)
+	requires (portDirection == PortDirection::output)
 	{
 		if (!this->connectedTo) throw;
 		this->connectedTo->onReceive(args...);
 	}
 
-	// Shouldn't be able to have an input port without a callback,
-	// so only output ports are allowed to be default-constructible.
-	// Thus, the only available constructor for input ports is
-	// the next one
-	Port() requires (portDirection == PortDirection::output) = default;
+	Port() = default;
 
 	template<typename F>
 	requires (portDirection == PortDirection::input)
@@ -104,4 +121,18 @@ public:
 	{
 		disconnect();
 	}
+};
+
+template<utils::ConstexprString _name, PortDirection _portDirection, typename... Ts>
+struct PortID
+{
+	static constexpr std::string_view name{_name};
+	static constexpr PortDirection portDirection{_portDirection};
+	using PortType = Port<portDirection, Ts...>;
+};
+
+template<typename T>
+concept PortIDType = requires (T x)
+{
+	{PortID{x}} -> std::same_as<T>;
 };
