@@ -28,13 +28,13 @@ class TestPatch : public Patch
 public:
 	TestPatch(unsigned int _samplerate) : samplerate{_samplerate}, oscillator{samplerate}, adsr{samplerate}
 	{
-		requestSample.connectTo(oscillator.sampleRequested);
-		oscillator.signalOut.connectTo(adsr.signalIn);
-		adsr.signalOut.connectTo(signalIn);
+		requestSample.connectTo(oscillator.getPort<"sampleRequested">());
+		oscillator.getPort<"signalOut">().connectTo(adsr.getPort<"signalIn">());
+		adsr.getPort<"signalOut">().connectTo(signalIn);
 
-		adsrKeyPressed.connectTo(adsr.pressed);
-		adsrKeyReleased.connectTo(adsr.released);
-		adsr.done.connectTo(adsrDone);
+		adsrKeyPressed.connectTo(adsr.getPort<"pressed">());
+		adsrKeyReleased.connectTo(adsr.getPort<"released">());
+		adsr.getPort<"done">().connectTo(adsrDone);
 	}
 
 	void onKeyPress(const MidiEvent&) override;

@@ -1,8 +1,16 @@
 #pragma once
 
 #include "port.hpp"
+#include "module.hpp"
 
-struct ADSRModule
+struct ADSRModule :
+	Module<
+		PortID<"pressed", PortDirection::input>,
+		PortID<"released", PortDirection::input>,
+		PortID<"done", PortDirection::output>,
+		PortID<"signalIn", PortDirection::input, double>,
+		PortID<"signalOut", PortDirection::output, double>
+	>
 {
 	const unsigned int samplerate;
 
@@ -18,23 +26,13 @@ struct ADSRModule
 	double t = 0;
 	double lastAdsrValue = 0;
 
-	/* To be connected to the patch object
-	 * or whatever logically controls ADSR */
-	Port<PortDirection::input> pressed{[this]{t = 0; lastAdsrValue = 0; duringRelease = false;}};
-	Port<PortDirection::input> released {[this]{releasedCallback();}};
-	Port<PortDirection::output> done;
-
-	/* Audio ports */
-	Port<PortDirection::input, double> signalIn {[this](double signal){signalInCallback(signal);}};
-	Port<PortDirection::output, double> signalOut;
-
 	double adsrValue(double t)
 	{
 		if (duringRelease)
 		{
 			if (t >= releaseTime + release)
 			{
-				done.send();
+				getPort<"done">().send();
 				return 0;
 			}
 			else return valueAtRelease*(1. - (t - releaseTime)/release);
@@ -48,7 +46,7 @@ struct ADSRModule
 	{
 		lastAdsrValue = adsrValue(t);
 
-		signalOut.send(signal * lastAdsrValue);
+		getPort<"signalOut">().send(signal * lastAdsrValue);
 		t += 1./samplerate;
 	}
 
@@ -58,5 +56,10 @@ struct ADSRModule
 		releaseTime = t;
 		duringRelease = true;
 	}
-	ADSRModule(unsigned int _samplerate) : samplerate{_samplerate} {};
+	ADSRModule(unsigned int _samplerate) : samplerate{_samplerate}
+	{
+		getPort<"pressed">().setCallback([this]{t = 0; lastAdsrValue = 0; duringRelease = false;});
+		getPort<"released">().setCallback([this]{releasedCallback();});
+		getPort<"signalIn">().setCallback([this](double signal){signalInCallback(signal);});
+	}
 };
