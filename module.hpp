@@ -35,8 +35,16 @@ template<std::size_t N, PortIDType id, PortIDType... ids>
 
 } // namespace detail
 
+class BaseModule
+{
+	[[nodiscard]] virtual constexpr std::vector<std::string_view> portNames() const = 0;
+
+	[[nodiscard]] virtual constexpr BasePort& getPort(std::string_view name) = 0;
+	[[nodiscard]] virtual constexpr const BasePort& getPort(std::string_view name) const = 0;
+};
+
 template<PortIDType... ids>
-struct Module
+class Module : public BaseModule
 {
 protected:
 	std::tuple<typename ids::PortType...> ports;
@@ -53,12 +61,23 @@ public:
 		return detail::getPortHelper<name, 0, ids...>(ports);
 	}
 
-	[[nodiscard]] constexpr BasePort& getPort(std::string_view name)
+	[[nodiscard]] static constexpr auto portNamesStatic()
+	{
+		return std::array{ids::name...};
+	}
+
+	[[nodiscard]] constexpr std::vector<std::string_view> portNames() const override
+	{
+		constexpr auto array = portNamesStatic();
+		return std::vector(array.begin(), array.end());
+	}
+
+	[[nodiscard]] constexpr BasePort& getPort(std::string_view name) override
 	{
 		return detail::getPortHelper<0, ids...>(ports, name);
 	}
 
-	[[nodiscard]] constexpr const BasePort& getPort(std::string_view name) const
+	[[nodiscard]] constexpr const BasePort& getPort(std::string_view name) const override
 	{
 		return detail::getPortHelper<0, ids...>(ports, name);
 	}
