@@ -45,9 +45,11 @@ namespace utils {
 			return size == N;
 		}
 
-		void push(T t) {
+		template<typename U>
+		void push(U&& u)
+		{
 			assert(!full());
-			*inputIterator = t;
+			*inputIterator = std::forward<U>(u);
 			inputIterator = next(inputIterator);
 			size++;
 		}
