@@ -6,6 +6,7 @@
 #include "midi.hpp"
 #include <algorithm>
 #include "mixer.hpp"
+#include "testpatch.hpp"
 
 MidiMapper::MidiMapper() : voices{utils::emplaceArray<Voice, NUM_VOICES>(Mixer::get().samplerate)}
 {
@@ -22,7 +23,7 @@ void MidiMapper::midi_callback(MidiEvent e)
 						v.businessReason().note.key == e.note.key);
 			}); voice != voices.end())
 		{
-			voice->onKeyPress(e);
+			voice->onKeyRepress();
 		}
 		else if (auto voice = std::find_if(voices.begin(), voices.end(),
 			[e](const auto& v)
@@ -30,7 +31,7 @@ void MidiMapper::midi_callback(MidiEvent e)
 				return v.businessReason().type == MidiEvent::Type::null;
 			}); voice != voices.end())
 		{
-			voice->onKeyPress(e);
+			voice->onKeyPress(e, std::make_unique<TestPatch>(Mixer::get().samplerate));
 		}
 	}
 	if (e.type == MidiEvent::Type::noteoff)
