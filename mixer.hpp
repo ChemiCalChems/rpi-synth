@@ -32,7 +32,7 @@ public:
 		}
 	}
 	
-	std::pair<u32, u32> requestSample(); //Requests samples from associated streams
+	double requestSample();
 	void fillBuffer();
 
 	void registerVoice(Voice* const);

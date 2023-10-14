@@ -1,5 +1,6 @@
 #include "mixer.hpp"
 #include <circle/synchronize.h>
+#include <numeric>
 #include <string>
 #include <circle/logger.h>
 #include <algorithm>
@@ -9,19 +10,15 @@ Mixer::Mixer(CInterruptSystem* interrupt_system, unsigned int samplerate_)
 {
 }
 
-std::pair<u32, u32> Mixer::requestSample() {
-	u32 sample = (GetRangeMin() + GetRangeMax())/2;
-
-	for (auto v : registeredVoices) {
-		sample += 0.05 * v->getSample() * (double(GetRangeMax()) - double(GetRangeMin()));
-	}
-
-	return {sample, sample};
+double Mixer::requestSample() {
+	return std::accumulate(registeredVoices.begin(), registeredVoices.end(), 0.0, [](const double result, auto& voice) {return result + 0.05 * voice->getSample();});
 }
 
 void Mixer::fillBuffer() {
 	if (!buffer.full()) {
-		buffer.push(requestSample());
+		u32 sample = double(GetRangeMin() + GetRangeMax()) / 2. + requestSample() * (double(GetRangeMax()) - double(GetRangeMin()));
+
+		buffer.push(std::make_pair(sample, sample));
 	}
 }
 void Mixer::registerVoice(Voice* const voice)
@@ -42,7 +39,7 @@ unsigned Mixer::GetChunk (u32* buf, unsigned chunk_size) {
 	for (unsigned i = 0; i<chunk_size; i+=2) {
 		std::pair<u32, u32> sample;
 		if (buffer.empty()) [[unlikely]] {
-			sample = requestSample();
+			sample = {(GetRangeMin() + GetRangeMax())/2, (GetRangeMin() + GetRangeMax())/2};
 		} else [[likely]] {
 			sample = buffer.pop();
 		}
