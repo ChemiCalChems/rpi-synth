@@ -46,7 +46,7 @@ public:
 		return instance;
 	}
 
-	void midi_callback(MidiEvent e) override;
+	void midiCallback(MidiEvent e) override;
 
 	void ppq();
 };

@@ -1,13 +1,20 @@
 #include "midi.hpp"
 #include <circle/logger.h>
 
-void MidiManager::run_callbacks(MidiEvent event) {
-	for (auto listener : listeners) listener->midi_callback(event);
+void MidiManager::runCallbacks(MidiEvent event) {
+	for (auto listener : listeners) listener->midiCallback(event);
 }
 
-void MidiManager::add_listener(MidiListener* listener) {
+MidiListener::MidiListener()
+{
 	CLogger::Get()->Write("MidiManager", LogNotice, "Added listener");
-	listeners.push_back(listener);
+	MidiManager::get().listeners.push_back(this);
+}
+
+MidiListener::~MidiListener()
+{
+	CLogger::Get()->Write("MidiManager", LogNotice, "Removed listener");
+	std::erase(MidiManager::get().listeners, this);
 }
 
 void MidiManager::init() {
@@ -20,6 +27,6 @@ void MidiManager::broadcast(const MidiEvent& ev) {
 
 void MidiManager::run() {
 	while (!eventBuffer.empty()) {
-		run_callbacks(eventBuffer.pop());
+		runCallbacks(eventBuffer.pop());
 	}
 }

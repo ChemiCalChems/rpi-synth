@@ -12,5 +12,5 @@ class MidiMapper : public MidiListener
 	std::array<Voice, NUM_VOICES> voices;
 public:
 	MidiMapper();
-	void midi_callback(MidiEvent) override;
+	void midiCallback(MidiEvent) override;
 };

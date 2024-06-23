@@ -12,7 +12,7 @@ MidiMapper::MidiMapper() : voices{utils::emplaceArray<Voice, NUM_VOICES>(Mixer::
 {
 }
 
-void MidiMapper::midi_callback(MidiEvent e)
+void MidiMapper::midiCallback(MidiEvent e)
 {
 	if (e.type == MidiEvent::Type::noteon)
 	{

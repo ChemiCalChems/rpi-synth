@@ -20,14 +20,14 @@ struct MidiEvent {
 class MidiListener;
 
 class MidiManager {
-	template <typename T, std::size_t N>
-	using Buffer = utils::Buffer<T,N>;
-	
-	MidiManager() {}
+	friend class MidiListener;
+
+	MidiManager() = default;
+
 	std::vector<MidiListener*> listeners;
-	Buffer<MidiEvent, 1024> eventBuffer;
+	utils::Buffer<MidiEvent, 1024> eventBuffer;
 	
-	void run_callbacks(MidiEvent event);
+	void runCallbacks(MidiEvent event);
 public:
 	MidiManager(MidiManager const&) = delete;
 	void operator=(MidiManager const&) = delete;
@@ -39,17 +39,20 @@ public:
 		return instance;
 	}
 
-	void add_listener(MidiListener* listener);
 	void init();
 	void run();
 	void broadcast(const MidiEvent& ev);
 };
 
 struct MidiListener {
-	virtual void midi_callback(MidiEvent) = 0;
-	MidiListener()
-	{
-		MidiManager::get().add_listener(this);
-	}
-};
+	virtual void midiCallback(MidiEvent) = 0;
+	MidiListener();
 
+	MidiListener(const MidiListener&) = delete;
+	MidiListener& operator=(const MidiListener&) = delete;
+
+	MidiListener(MidiListener&& other) = delete;
+	MidiListener& operator=(MidiListener&&) = delete;
+
+	virtual ~MidiListener();
+};

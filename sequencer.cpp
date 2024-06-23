@@ -31,7 +31,7 @@ void Sequencer::ppq() {
 		for (auto& e : loop.current()) MidiManager::get().broadcast(e);
 }
 
-void Sequencer::midi_callback(MidiEvent e) {
+void Sequencer::midiCallback(MidiEvent e) {
 	if (e.type == MidiEvent::Type::timingClock)
 	{
 		ppq();
