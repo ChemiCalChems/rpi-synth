@@ -13,7 +13,7 @@ OBJS	= main.o kernel.o midi.o sequencer.o midiinput.o mixer.o waveform.o clock.o
 voice.o midimapper.o testpatch.o
 
 OPTIMIZE = -Ofast
-STANDARD = -std=c++20
+STANDARD = -std=c++23
 
 include $(CIRCLEHOME)/Rules.mk
 
