@@ -17,7 +17,7 @@ STANDARD = -std=c++23
 
 include $(CIRCLEHOME)/Rules.mk
 
-CFLAGS += -isystem "$(NEWLIBDIR)/include"
+CFLAGS += -g -isystem "$(NEWLIBDIR)/include"
 LIBS := "$(NEWLIBDIR)/lib/libm.a" "$(NEWLIBDIR)/lib/libc.a" "$(NEWLIBDIR)/lib/libcirclenewlib.a" \
 	$(CIRCLEHOME)/addon/SDCard/libsdcard.a \
 	$(CIRCLEHOME)/lib/usb/libusb.a \

@@ -5,6 +5,8 @@ protected:
 	double f;
 public:
 	Waveform(double _f) : f{_f} {};
+	virtual ~Waveform() = default;
+
 	virtual double getSample(double t) = 0;
 };
 

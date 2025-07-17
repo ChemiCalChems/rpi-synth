@@ -16,7 +16,11 @@ class Mixer : public CPWMSoundBaseDevice {
 	utils::Buffer<std::pair<u32, u32>, 384> buffer; //Used to preprocess data to be sent on GetChunk call
 public:
 	unsigned samplerate;
-	std::vector<Voice*> registeredVoices;
+private:
+	// TODO: Voices for sure don't belong to the MidiMapper, but
+	// are they really owned by Mixer or are they standalone?
+	std::array<std::pair<Voice, bool /*assigned*/>, NUM_VOICES> voices;
+public:
 	
 	Mixer(Mixer const&) = delete;
 	void operator=(Mixer const&) = delete;
@@ -35,8 +39,8 @@ public:
 	double requestSample();
 	void fillBuffer();
 
-	void registerVoice(Voice* const);
-	void unregisterVoice(Voice* const);
+	Voice* requestVoice();
+	void returnVoice(Voice*);
 
 	unsigned GetChunk (u32* buffer, unsigned chunk_size) override;
 	

@@ -1,17 +1,23 @@
 #include "mixer.hpp"
+#include "midi.hpp"
 #include <circle/synchronize.h>
 #include <numeric>
 #include <string>
 #include <circle/logger.h>
 #include <algorithm>
+#include <ranges>
+#include <circle/logger.h>
+#include <format>
 
 Mixer::Mixer(CInterruptSystem* interrupt_system, unsigned int samplerate_)
-	: CPWMSoundBaseDevice(interrupt_system, samplerate_, 384), samplerate{samplerate_}
+	: CPWMSoundBaseDevice(interrupt_system, samplerate_, 384), samplerate{samplerate_},
+	voices{utils::emplaceArray<std::pair<Voice, bool>, NUM_VOICES>(std::make_pair(samplerate, false))}
 {
 }
 
 double Mixer::requestSample() {
-	return std::accumulate(registeredVoices.begin(), registeredVoices.end(), 0.0, [](const double result, auto& voice) {return result + 0.05 * voice->getSample();});
+	auto assignedVoicesRange{voices | std::ranges::views::filter([](const auto& v){return v.second;})};
+	return std::accumulate(assignedVoicesRange.begin(), assignedVoicesRange.end(), 0.0, [](const double result, auto& voice) {return result + 0.05 * voice.first.getSample();});
 }
 
 void Mixer::fillBuffer() {
@@ -21,15 +27,31 @@ void Mixer::fillBuffer() {
 		buffer.push(std::make_pair(sample, sample));
 	}
 }
-void Mixer::registerVoice(Voice* const voice)
+
+Voice* Mixer::requestVoice()
 {
-	registeredVoices.push_back(voice);
+	for (auto& voice : voices)
+	{
+		bool& assigned = voice.second;
+		if (!assigned)
+		{
+			assigned = true;
+			return &voice.first;
+		}
+	}
+	return nullptr;
 }
 
-void Mixer::unregisterVoice(Voice* const voice)
+void Mixer::returnVoice(Voice* v)
 {
-	registeredVoices.erase(std::remove(registeredVoices.begin(), registeredVoices.end(), voice),
-		registeredVoices.end());
+	for (auto& voice : voices)
+	{
+		if (v == &voice.first)
+		{
+			voice.second = false;
+			return;
+		}
+	}
 }
 
 unsigned Mixer::GetChunk (u32* buf, unsigned chunk_size) {

@@ -1,16 +1,15 @@
 #pragma once
 
 #include "midi.hpp"
-#include <map>
 #include "voice.hpp"
-#include <array>
+#include <unordered_map>
 
 #define NUM_VOICES 16
 
 class MidiMapper : public MidiListener
 {
-	std::array<Voice, NUM_VOICES> voices;
+	std::unordered_map<decltype(MidiEvent::NoteEvent::key), Voice*> mappedVoices;
 public:
-	MidiMapper();
 	void midiCallback(MidiEvent) override;
+	void onVoiceDone(Voice*);
 };
