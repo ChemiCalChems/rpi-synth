@@ -4,6 +4,7 @@
 #include <array>
 #include <algorithm>
 #include <string_view>
+#include <ranges>
 
 namespace utils {
 	[[nodiscard]] static double midi_to_note_freq(int note) {
@@ -22,6 +23,75 @@ namespace utils {
 		T2 halfRange = std::abs(rangeMax - center);
 		return center + value * halfRange;
 	}
+
+	template<std::input_iterator Iterator>
+	struct RolloverIterator
+	{
+		using difference_type = typename std::iterator_traits<Iterator>::difference_type;
+		using value_type = typename std::iterator_traits<Iterator>::value_type;
+		using pointer = typename std::iterator_traits<Iterator>::pointer;
+		using reference = typename std::iterator_traits<Iterator>::reference;
+		using iterator_category = std::bidirectional_iterator_tag;
+
+	private:
+		Iterator rangeBegin;
+		Iterator rangeEnd;
+		Iterator current;
+
+	public:
+		constexpr RolloverIterator() = default;
+		constexpr RolloverIterator(const Iterator& rangeBegin_, const Iterator& rangeEnd_)
+		: rangeBegin{rangeBegin_}, rangeEnd{rangeEnd_}, current{rangeBegin_}
+		{
+		}
+
+		constexpr RolloverIterator& operator++()
+		{
+			++current;
+			if (current == rangeEnd) current = rangeBegin;
+
+			return *this;
+		}
+
+		constexpr RolloverIterator operator++(int)
+		{
+			auto result = *this;
+			++*this;
+
+			return result;
+		}
+
+		constexpr RolloverIterator& operator--() requires std::bidirectional_iterator<Iterator>
+		{
+			if (current == rangeBegin) current = std::prev(rangeEnd);
+			else --current;
+
+			return *this;
+		}
+
+		constexpr RolloverIterator operator--(int) requires std::bidirectional_iterator<Iterator>
+		{
+			auto result = *this;
+			--*this;
+
+			return result;
+		}
+
+		[[nodiscard]] constexpr auto& operator*() &
+		{
+			return *current;
+		}
+
+		[[nodiscard]] constexpr auto operator*() &&
+		{
+			return *current;
+		}
+
+		[[nodiscard]] constexpr auto operator->()
+		{
+			return &(*current);
+		}
+	};
 
 	template<typename T, std::size_t N>
 	struct Buffer {
@@ -108,4 +178,50 @@ namespace utils {
 
 	template<std::size_t M>
 	ConstexprString(const char(&)[M]) -> ConstexprString<M-1>;
+
+	template<typename T, std::size_t N>
+	struct Last
+	{
+		using value_type = T;
+		static constexpr std::size_t size = N;
+	private:
+		std::array<value_type, size> data{};
+	public:
+		using IteratorType = RolloverIterator<typename decltype(data)::iterator>;
+
+		IteratorType writeIt{data.begin(), data.end()};
+	public:
+		constexpr Last() = default;
+		constexpr Last(std::initializer_list<T> list)
+		{
+			if (list.size() > size) throw;
+
+			std::copy_n(std::begin(list), list.size(), data.begin());
+			std::advance(writeIt, list.size());
+		}
+
+		template<typename U>
+		constexpr void push(U&& u)
+		{
+			if constexpr (size == 0) return;
+
+			*writeIt = std::forward<U>(u);
+			writeIt++;
+		}
+
+		[[nodiscard]] constexpr T operator[](int i)
+		{
+			return *std::prev(writeIt, -i + 1);
+		}
+
+		[[nodiscard]] constexpr auto begin() const
+		{
+			return std::begin(std::views::counted(std::reverse_iterator(writeIt), size));
+		}
+
+		[[nodiscard]] constexpr auto end() const
+		{
+			return std::end(std::views::counted(std::reverse_iterator(writeIt), size));
+		}
+	};
 }

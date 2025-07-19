@@ -1,8 +1,6 @@
 #include "midiinput.hpp"
 #include <circle/logger.h>
 #include <string>
-#include <sstream>
-#include <iomanip>
 
 MidiInput::MidiInput(CInterruptSystem* interruptSystem)
 	: serial(interruptSystem, true) {

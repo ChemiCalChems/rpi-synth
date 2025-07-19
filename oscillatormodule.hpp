@@ -3,6 +3,7 @@
 #include "waveform.hpp"
 #include "port.hpp"
 #include "module.hpp"
+#include <memory>
 
 struct OscillatorModule :
 	Module<
