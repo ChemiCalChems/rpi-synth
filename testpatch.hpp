@@ -20,7 +20,7 @@ class TestPatch : public Patch
 	Port<PortDirection::input, double> signalIn{[this](double x){lastSample = x;}};
 	std::optional<double> lastSample;
 
-	DiscreteFilterModule<1, 1> filter;
+	DiscreteFilterModule<6, 6> filter;
 
 	ADSRModule adsr;
 	Port<PortDirection::output> adsrKeyPressed;
@@ -29,20 +29,6 @@ class TestPatch : public Patch
 public:
 	TestPatch(unsigned int _samplerate) : samplerate{_samplerate}, oscillator{samplerate}, adsr{samplerate}
 	{
-		double cutoff_frequency = 1000.;
-		double RC = 1./(cutoff_frequency * 2. * 3.14159265);
-		double RCK = 2. * RC * double(samplerate);
-
-		// low pass filter coefficients
-		filter.feedforward_coeff[0] = 1./(1. + RCK);
-		filter.feedforward_coeff[1] = 1./(1. + RCK);
-		filter.feedback_coeff[0] = (1. - RCK)/(1. + RCK);
-
-		// high pass filter coefficients
-		filter.feedforward_coeff[0] = RCK / (RCK + 1.);
-		filter.feedforward_coeff[1] = - RCK / (RCK + 1.);
-		filter.feedback_coeff[0] = (1. - RCK)/(1. + RCK);
-
 		requestSample.connectTo(oscillator.getPort<"sampleRequested">());
 		oscillator.getPort<"signalOut">().connectTo(filter.getPort<"signalIn">());
 		filter.getPort<"signalOut">().connectTo(adsr.getPort<"signalIn">());

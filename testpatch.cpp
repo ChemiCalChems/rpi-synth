@@ -3,7 +3,9 @@
 
 void TestPatch::onKeyPress(const MidiEvent& event)
 {
-	oscillator.waveform = std::make_unique<WaveformBase<0>>(utils::midi_freqs[event.note.key]);
+	double freq{utils::midi_freqs[event.note.key]};
+	filter.SetTransferFunction(BilinearTransform(ButterworthLowPass(freq*2.), samplerate).InvertVariable());
+	oscillator.waveform = std::make_unique<WaveformBase<0>>(freq);
 	adsrKeyPressed.send();
 }
 
