@@ -4,8 +4,6 @@
 #include "voice.hpp"
 #include <unordered_map>
 
-#define NUM_VOICES 16
-
 class MidiMapper : public MidiListener
 {
 	std::unordered_map<decltype(MidiEvent::NoteEvent::key), Voice*> mappedVoices;

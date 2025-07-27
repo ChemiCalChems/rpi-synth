@@ -8,10 +8,11 @@
 #include <ranges>
 #include <circle/logger.h>
 #include <format>
+#include "config.hpp"
 
-Mixer::Mixer(CInterruptSystem* interrupt_system, unsigned int samplerate_)
-	: CPWMSoundBaseDevice(interrupt_system, samplerate_, 384), samplerate{samplerate_},
-	voices{utils::emplaceArray<std::pair<Voice, bool>, NUM_VOICES>(std::make_pair(samplerate, false))}
+Mixer::Mixer(unsigned int samplerate_)
+	: CPWMSoundBaseDevice(CInterruptSystem::Get(), samplerate_, 384), samplerate{samplerate_},
+	voices{utils::emplaceArray<std::pair<Voice, bool>, Config::NUM_VOICES>(std::make_pair(samplerate, false))}
 {
 }
 

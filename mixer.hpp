@@ -8,25 +8,24 @@
 #include "utils.hpp"
 #include <utility> //pair
 #include "voice.hpp"
-
-#define NUM_VOICES 16
+#include "config.hpp"
 
 class Mixer : public CPWMSoundBaseDevice {
-	Mixer (CInterruptSystem* interrupt_system, unsigned samplerate = 44100);
+	Mixer(unsigned samplerate = Config::SAMPLERATE);
 	utils::Buffer<std::pair<u32, u32>, 384> buffer; //Used to preprocess data to be sent on GetChunk call
 public:
 	unsigned samplerate;
 private:
 	// TODO: Voices for sure don't belong to the MidiMapper, but
 	// are they really owned by Mixer or are they standalone?
-	std::array<std::pair<Voice, bool /*assigned*/>, NUM_VOICES> voices;
+	std::array<std::pair<Voice, bool /*assigned*/>, Config::NUM_VOICES> voices;
 public:
 	
 	Mixer(Mixer const&) = delete;
 	void operator=(Mixer const&) = delete;
 
 	static Mixer& get() {
-		static Mixer instance (CInterruptSystem::Get());
+		static Mixer instance;
 		return instance;
 	}
 
