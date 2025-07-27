@@ -77,6 +77,7 @@ void keypressed (const char* c) {
 
 TShutdownMode CKernel::Run (void)
 {
+	m_ActLED.Off();
 	m_Logger.Write (FromKernel, LogNotice, "Compile time: " __DATE__ " " __TIME__);
 	
 	//CUSBKeyboardDevice *pKeyboard = (CUSBKeyboardDevice *) m_DeviceNameService.GetDevice ("ukbd1", FALSE);
@@ -89,16 +90,17 @@ TShutdownMode CKernel::Run (void)
 	Mixer::get().init();
 	MidiMapper mapper;
 
+	m_ActLED.On();
 	while (true) {
-		if (Mixer::get().debugReady) {
-			std::string msg = std::to_string(Mixer::get().sampleCountBeforeCallback);
-			if (Mixer::get().sampleCountBeforeCallback != 384) m_Logger.Write(FromKernel, LogDebug, msg.c_str());
-			Mixer::get().debugReady = false;
-		}
+		// if (Mixer::get().debugReady) {
+		// 	std::string msg = std::to_string(Mixer::get().sampleCountBeforeCallback);
+		// 	if (Mixer::get().sampleCountBeforeCallback != 384) m_Logger.Write(FromKernel, LogDebug, msg.c_str());
+		// 	Mixer::get().debugReady = false;
+		// }
 		//LEDOff{m_ActLED};
 		//m_Logger.Write(FromKernel, LogDebug, std::to_string(memeCount++).c_str());
-		if (Mixer::get().IsActive()) m_ActLED.On();
-		else m_ActLED.Off();
+		// if (Mixer::get().IsActive()) m_ActLED.On();
+		// else m_ActLED.Off();
 
 		input.read();
 		MidiManager::get().run();

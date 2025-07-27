@@ -57,7 +57,6 @@ void Mixer::returnVoice(Voice* v)
 
 unsigned Mixer::GetChunk (u32* buf, unsigned chunk_size) {
 	sampleCountBeforeCallback = buffer.size;
-	debugReady = true;
 
 	for (unsigned i = 0; i<chunk_size; i+=2) {
 		std::pair<u32, u32> sample;
