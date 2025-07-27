@@ -21,10 +21,9 @@ static constexpr auto midi_freqs = []() {
 }();
 
 template<typename T1, typename T2>
-[[nodiscard]] T2 mapToRange(T1 value, T2 rangeMin, T2 rangeMax) {
-    T2 center = (rangeMin + rangeMax)/2;
-    T2 halfRange = std::abs(rangeMax - center);
-    return center + value * halfRange;
+[[nodiscard]] constexpr T2 mapToRange(T1 value, T2 outputRangeMin, T2 outputRangeMax, T1 inputRangeMin = -1., T1 inputRangeMax = 1.)
+{
+    return outputRangeMin + (std::clamp(value, inputRangeMin, inputRangeMax) - inputRangeMin) / (inputRangeMax - inputRangeMin) * (outputRangeMax - outputRangeMin);
 }
 
 template<std::input_iterator Iterator>

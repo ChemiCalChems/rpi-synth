@@ -23,7 +23,7 @@ double Mixer::requestSample() {
 
 void Mixer::fillBuffer() {
 	if (!buffer.full()) {
-		u32 sample = double(GetRangeMin() + GetRangeMax()) / 2. + requestSample() * (double(GetRangeMax()) - double(GetRangeMin()));
+		u32 sample = utils::mapToRange(requestSample(), GetRangeMin(), GetRangeMax());
 
 		buffer.push(std::make_pair(sample, sample));
 	}
