@@ -1,10 +1,12 @@
 #pragma once
 
+#include "filtermath.hpp"
+
 class Waveform {
 protected:
 	double f;
 public:
-	Waveform(double _f) : f{_f} {};
+	Waveform(double _f) : f{_f} {}
 	virtual ~Waveform() = default;
 
 	virtual double getSample(double t) = 0;
@@ -16,8 +18,10 @@ class WaveformBase : public Waveform {
 
 template<>
 class WaveformBase<0> : public Waveform { //square
-	using Waveform::Waveform;
+	DiscreteFilter<6,6> filter;
 	double getSample(double t) override;
+public:
+	WaveformBase(double _f);
 };
 
 template<>
@@ -37,4 +41,3 @@ class WaveformBase<3> : public Waveform { //triangle
 	using Waveform::Waveform;
 	double getSample(double t) override;
 };
-

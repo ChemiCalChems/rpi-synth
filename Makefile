@@ -10,14 +10,14 @@ CIRCLEHOME = $(CIRCLESTDLIBHOME)/libs/circle
 NEWLIBDIR = $(CIRCLESTDLIBHOME)/install/$(NEWLIB_ARCH)
 
 OBJS	= main.o kernel.o midi.o sequencer.o midiinput.o mixer.o waveform.o clock.o \
-voice.o midimapper.o testpatch.o
+voice.o midimapper.o testpatch.o wavetable_square.o
 
 OPTIMIZE = -Ofast
 STANDARD = -std=c++23
 
 include $(CIRCLEHOME)/Rules.mk
 
-CFLAGS += -g -isystem "$(NEWLIBDIR)/include"
+CFLAGS += -g -isystem "$(NEWLIBDIR)/include" -fconstexpr-ops-limit=10000000000
 LIBS := "$(NEWLIBDIR)/lib/libm.a" "$(NEWLIBDIR)/lib/libc.a" "$(NEWLIBDIR)/lib/libcirclenewlib.a" \
 	$(CIRCLEHOME)/addon/SDCard/libsdcard.a \
 	$(CIRCLEHOME)/lib/usb/libusb.a \
